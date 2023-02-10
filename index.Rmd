@@ -1,6 +1,15 @@
+---
+runtime: shiny
+title: "WDI Dashboard"
+author: "by √3kT/m"
+---
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(htmltools)
+library(shiny)
+library(shinydashboard)
+
 
 ```
 
@@ -10,8 +19,15 @@ Indicators Overview
 
    
 Countries Overview 
-=====================================     
+=====================================  
 
+```{r}
+
+source("hello.r")
+
+worldPhonesUI("1")
+worldPhones("1")
+```
 
 Architecture {data-navmenu="Making"}
 =====================================  
