@@ -1,0 +1,25 @@
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+```
+
+
+Indicators Overview 
+===================================== 
+
+   
+Countries Overview 
+=====================================     
+
+
+Architecture {data-navmenu="Making"}
+=====================================  
+
+
+Widgets {data-navmenu="Making"}
+=====================================  
+
+
+Team
+=====================================     

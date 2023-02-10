@@ -1,0 +1,11 @@
+---
+title: "WDI Dashboard"
+author: "by √3kT/m"
+output: 
+  flexdashboard::flex_dashboard:
+    source_code: https://github.com/olesia-brusentceva/dash-board.git
+    theme: 
+      version: 4
+      bootswatch: minty
+output_dir: docs
+---
