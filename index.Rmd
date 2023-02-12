@@ -12,19 +12,7 @@ library(shinydashboard)
 library(leaflet)
 library(WDI)
 library(bslib)
-<<<<<<< HEAD
-<<<<<<< HEAD
 library(plotly)
-=======
-=======
-library(plotly)
->>>>>>> bbf26b22c0836035aed9f4c332d53c12f50a834f
-
-#uncomment if run for the first time 
-#source("apps/data/get-data.r")
-
-
->>>>>>> 818c5a03024b870d609b57b15027e2f5e5fc3d6c
 ```
 
 ```{r import-data, cache=TRUE}
