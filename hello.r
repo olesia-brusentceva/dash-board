@@ -1,21 +1,58 @@
-# Shiny worldPhones module 
-
-# UI function
-worldPhonesUI <- function(id) {
+# Define UI for app that draws a histogram ----
+ui <- function(id) {
   ns <- NS(id)
-  fillCol(height = 600, flex = c(NA, 1), 
-          inputPanel(
-            selectInput(ns("region"), "Region:", choices = colnames(WorldPhones))
-          ),
-          plotOutput(ns("phonePlot"), height = "100%")
+  fluidPage(
+  
+  # App title ----
+  titlePanel("Hello Shiny!"),
+  
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+    
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+      
+      # Input: Slider for the number of bins ----
+      sliderInput(inputId = ns("bins"),
+                  label = "Number of bins:",
+                  min = 1,
+                  max = 50,
+                  value = 30)
+      
+    ),
+    
+    # Main panel for displaying outputs ----
+    mainPanel(
+      
+      # Output: Histogram ----
+      plotOutput(outputId = "distPlot")
+      
+    )
   )
+)
 }
 
-# Server function
-worldPhones <- function(id) {
-  moduleServer(id, function(input, output, session) {
-    output$phonePlot <- renderPlot(
-      barplot(WorldPhones[, input$region] * 1000,
-              ylab = "Number of Telephones", xlab = "Year"))
+server <- function(id) {
+  moduleServer(id,function(input, output,session) {
+  
+  # Histogram of the Old Faithful Geyser Data ----
+  # with requested number of bins
+  # This expression that generates a histogram is wrapped in a call
+  # to renderPlot to indicate that:
+  #
+  # 1. It is "reactive" and therefore should be automatically
+  #    re-executed when inputs (input$bins) change
+  # 2. Its output type is a plot
+  output$distPlot <- renderPlot({
+    
+    x    <- faithful$waiting
+    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+    
+    hist(x, breaks = bins, col = "#007bc2", border = "white",
+         xlab = "Waiting time to next eruption (in mins)",
+         main = "Histogram of waiting times")
+    
   })
+  
+})
 }
