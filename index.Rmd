@@ -45,50 +45,6 @@ server = function(input, output) {
 Countries Overview 
 =====================================  
 
-```{r}
-shinyApp(
-  ui = fluidPage(
-  theme = bs_theme(version = 4, bootswatch = "minty"),
- # Sidebar layout with input and output definitions ----
-  sidebarLayout(
-    sidebarPanel(
-    
-      selectizeInput(
-        inputId = "cities", 
-        label = "Select a city", 
-        choices = unique(txhousing$city), 
-        selected = "Abilene",
-        multiple = TRUE
-        ),
-      img(
-        src = "shrimp.jpg",
-        alt = "Short description of what's in the pic",
-        width = 25, height = 25
-        )
-    ),
-    mainPanel(
-      tabsetPanel(type = "tabs",
-                  tabPanel("Custom", plotlyOutput(outputId = "p")),
-                  tabPanel("Overview"),
-                  tabPanel("XvsY"))
-        ),
-  )
-),
-  
-##########################################################################
-  server = function(input, output) {
-    output$p <- renderPlotly({
-    req(input$cities)
-    if (identical(input$cities, "")) return(NULL)
-    p <- ggplot(data = filter(txhousing, city %in% input$cities)) + 
-      geom_line(aes(date, median, group = city))
-    height <- session$clientData$output_p_height
-    width <- session$clientData$output_p_width
-    ggplotly(p, height = height, width = width)
-  })
-  }
-)
-```
 
 Architecture {data-navmenu="Making"}
 =====================================  
