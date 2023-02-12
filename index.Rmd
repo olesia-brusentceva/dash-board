@@ -12,7 +12,15 @@ library(shinydashboard)
 library(leaflet)
 library(WDI)
 library(bslib)
+<<<<<<< HEAD
 library(plotly)
+=======
+
+#uncomment if run for the first time 
+#source("apps/data/get-data.r")
+
+
+>>>>>>> 818c5a03024b870d609b57b15027e2f5e5fc3d6c
 ```
 
 ```{r import-data, cache=TRUE}
@@ -45,6 +53,41 @@ server = function(input, output) {
 Countries Overview 
 =====================================  
 
+```{r}
+shinyApp(
+  ui = fluidPage(
+  theme = bs_theme(version = 4, bootswatch = "minty"),
+ # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    # Sidebar panel for inputs ----
+    sidebarPanel(),
+
+      # br() element to introduce extra vertical spacing ----
+      br(),
+
+    ),
+
+    # Main panel for displaying outputs ----
+    mainPanel(
+
+      # Output: Tabset w/ plot, summary, and table ----
+      tabsetPanel(type = "tabs",
+                  tabPanel("Castom"),
+                  tabPanel("Overview"),
+                  tabPanel("XvsY")
+      )
+
+    )
+  ),
+  
+  # Define server logic for random distribution app ----
+  server = function(input, output) {
+
+    
+  }
+)
+```
 
 Architecture {data-navmenu="Making"}
 =====================================  
