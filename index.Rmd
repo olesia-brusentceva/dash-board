@@ -12,6 +12,7 @@ library(shinydashboard)
 library(leaflet)
 library(WDI)
 library(bslib)
+library(plotly)
 
 #uncomment if run for the first time 
 #source("apps/data/get-data.r")
@@ -33,32 +34,41 @@ shinyApp(
   theme = bs_theme(version = 4, bootswatch = "minty"),
  # Sidebar layout with input and output definitions ----
   sidebarLayout(
-
-    # Sidebar panel for inputs ----
-    sidebarPanel(),
-
-      # br() element to introduce extra vertical spacing ----
-      br(),
-
-    ),
-
-    # Main panel for displaying outputs ----
-    mainPanel(
-
-      # Output: Tabset w/ plot, summary, and table ----
-      tabsetPanel(type = "tabs",
-                  tabPanel("Castom"),
-                  tabPanel("Overview"),
-                  tabPanel("XvsY")
-      )
-
-    )
-  ),
-  
-  # Define server logic for random distribution app ----
-  server = function(input, output) {
-
+    sidebarPanel(
     
+      selectizeInput(
+        inputId = "cities", 
+        label = "Select a city", 
+        choices = unique(txhousing$city), 
+        selected = "Abilene",
+        multiple = TRUE
+        ),
+      img(
+        src = "shrimp.jpg",
+        alt = "Short description of what's in the pic",
+        width = 25, height = 25
+        )
+    ),
+    mainPanel(
+      tabsetPanel(type = "tabs",
+                  tabPanel("Custom", plotlyOutput(outputId = "p")),
+                  tabPanel("Overview"),
+                  tabPanel("XvsY"))
+        ),
+  )
+),
+  
+##########################################################################
+  server = function(input, output) {
+    output$p <- renderPlotly({
+    req(input$cities)
+    if (identical(input$cities, "")) return(NULL)
+    p <- ggplot(data = filter(txhousing, city %in% input$cities)) + 
+      geom_line(aes(date, median, group = city))
+    height <- session$clientData$output_p_height
+    width <- session$clientData$output_p_width
+    ggplotly(p, height = height, width = width)
+  })
   }
 )
 ```
