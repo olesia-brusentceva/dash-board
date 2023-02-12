@@ -9,6 +9,7 @@ library(flexdashboard)
 library(htmltools)
 library(shiny)
 library(shinydashboard)
+library(leaflet)
 
 
 ```
@@ -21,14 +22,6 @@ Indicators Overview
 Countries Overview 
 =====================================  
 
-```{r}
-
-source("hello.r")
-
-ui("1")
-server("1")
-
-```
 
 Architecture {data-navmenu="Making"}
 =====================================  
