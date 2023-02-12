@@ -15,36 +15,40 @@ library(bslib)
 library(plotly)
 ```
 
-```{r import-data, cache=TRUE}
+```{r import-data}
+
 source("apps/data/get-data.r")
+source("apps/choose-country-list/choose-country-list.R")
 ```
 
 Indicators Overview 
 ===================================== 
-```{r}
-source("apps/choose-country-list/choose-country-list.R")
 
-shinyApp(
-ui = fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-  ChooseCountryListUI("1")),
-  mainPanel(
-  textOutput("ChooseCountryList")
-  )
-)
-)
-,
-server = function(input, output) {
-  output$ChooseCountryList<-ChooseCountryListServer("1")
-}
-)
-```
-
-   
 Countries Overview 
 =====================================  
 
+```{r}
+shinyApp(
+  ui = fluidPage(
+  theme = bs_theme(version = 4, bootswatch = "minty"),
+  sidebarLayout(
+    sidebarPanel(
+      ChooseCountryListUI("1")),
+    mainPanel(
+      tabsetPanel(type = "tabs",
+                  tabPanel("Custom", textOutput("ChooseCountryList")),
+                  tabPanel("Overview"),
+                  tabPanel("XvsY"))
+        ),
+  )
+),
+  
+##########################################################################
+  server = function(input, output) {
+    output$ChooseCountryList<-ChooseCountryListServer("1")
+  }
+)
+```
 
 Architecture {data-navmenu="Making"}
 =====================================  
