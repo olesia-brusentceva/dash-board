@@ -1,6 +1,7 @@
 ChooseIndicatorListUI <- function(id) {
   ns <- NS(id)
-  shinyUI(
+  fluidPage(
+    fluidRow(
     selectizeInput(
       inputId = ns('searchIndicator'),
       label = 'Select Indicator',
@@ -8,7 +9,11 @@ ChooseIndicatorListUI <- function(id) {
       selected = NULL,
       multiple = TRUE, # allow for multiple inputs
       options = list(create = FALSE) # if TRUE, allows newly created inputs
-    )
+    )),
+    fluidRow(
+      helpText("Start typing Indicator name or select it out of the list. You can select up to 6 indicators to be displayed ")
+    ),
+    hr()
   )
 }
 

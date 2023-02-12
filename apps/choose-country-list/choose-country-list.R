@@ -1,14 +1,19 @@
 ChooseCountryListUI <- function(id) {
   ns <- NS(id)
-  shinyUI(
+  fluidPage(
+  fluidRow(
     selectizeInput(
       inputId = ns('searchCountry'),
-      label = 'Select Country',
+      label = 'Search Country',
       choices = WDI_Countries$Country.Name,
-      selected = NULL,
+      selected = "Ukraine",
       multiple = TRUE, # allow for multiple inputs
       options = list(create = FALSE) # if TRUE, allows newly created inputs
-    )
+    )),
+  fluidRow(
+    helpText("Start typing country or region name or select it on the map")
+  ),
+  hr()
   )
 }
 
