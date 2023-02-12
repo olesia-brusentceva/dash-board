@@ -10,13 +10,36 @@ library(htmltools)
 library(shiny)
 library(shinydashboard)
 library(leaflet)
-
-
+library(WDI)
+library(bslib)
+library(plotly)
 ```
 
+```{r import-data, cache=TRUE}
+source("apps/data/get-data.r")
+```
 
 Indicators Overview 
 ===================================== 
+```{r}
+source("apps/choose-country-list/choose-country-list.R")
+
+shinyApp(
+ui = fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+  ChooseCountryListUI("1")),
+  mainPanel(
+  textOutput("ChooseCountryList")
+  )
+)
+)
+,
+server = function(input, output) {
+  output$ChooseCountryList<-ChooseCountryListServer("1")
+}
+)
+```
 
    
 Countries Overview 
