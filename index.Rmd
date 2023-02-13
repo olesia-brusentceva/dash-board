@@ -9,6 +9,7 @@ library(flexdashboard)
 library(htmltools)
 library(shiny)
 library(shinydashboard)
+library(shinycssloaders)
 library(leaflet)
 library(WDI)
 library(bslib)
@@ -38,8 +39,8 @@ shinyApp(
       ChooseIndicatorListUI("2")),
     mainPanel(
       tabsetPanel(type = "tabs",
-                  tabPanel("Custom", tableOutput("table")),
-                  tabPanel("Overview",tableOutput("ChooseIndicatorList")),
+                  tabPanel("Custom",withSpinner(tableOutput("table"), color = "#80c4ac")),
+                  tabPanel("Overview"),  
                   tabPanel("XvsY"))
         ),
   )
@@ -47,8 +48,7 @@ shinyApp(
   
 ##########################################################################
   server = function(input, output) {
-    output$table <- renderTable({WDI(country=ChooseCountryListServer("1"),indicator = ChooseIndicatorListServer("2"))()})
-    output$ChooseIndicatorList<-renderTable({ChooseIndicatorListServer("2")()})
+    output$table <- renderTable({WDI(country = ChooseCountryListServer("1")(), indicator = ChooseIndicatorListServer("2")())})
   }
 )
 ```

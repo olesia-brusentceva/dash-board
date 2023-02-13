@@ -6,7 +6,7 @@ ChooseIndicatorListUI <- function(id) {
       inputId = ns('searchIndicator'),
       label = 'Select Indicator',
       choices = WDI_Indicators$Indicator.Name,
-      selected = NULL,
+      selected = "GDP per capita (constant 2015 US$)",
       multiple = TRUE, # allow for multiple inputs
       options = list(create = FALSE) # if TRUE, allows newly created inputs
     )),
