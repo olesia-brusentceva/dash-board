@@ -33,34 +33,39 @@ Countries Overview
 
 ```{r}
 shinyApp(
+  ####
+  #UI#
+  ####
   ui = fluidPage(
-  theme = bs_theme(version = 4, bootswatch = "minty"),
-  sidebarLayout(
-    sidebarPanel(
-      ChooseCountryListUI("1"),
-      ChooseIndicatorListUI("2"),
-      ChooseDateUI("3"),
-      submitButton("Update View", icon("refresh"))
+    theme = bs_theme(version = 4, bootswatch = "minty"),
+    sidebarLayout(
+      sidebarPanel(
+        ChooseCountryListUI("1"),
+        ChooseIndicatorListUI("2"),
+        ChooseDateUI("3"),
+        submitButton("Update View", icon("refresh"))
       ),
-    mainPanel(
-      tabsetPanel(type = "tabs",
-                  tabPanel("Custom",withSpinner(tableOutput("table"), color = "#80c4ac")),
-                  tabPanel("Overview"),  
-                  tabPanel("XvsY"))
-        ),
-  )
-),
-  
-##########################################################################
+      mainPanel(tabsetPanel(
+        type = "tabs",
+        tabPanel("Custom",
+                 withSpinner(tableOutput("table"), color = "#80c4ac")),
+        tabPanel("Overview"),
+        tabPanel("XvsY")
+      )),
+    )
+  ),
+  ########
+  #SERVER#
+  ########
   server = function(input, output) {
     output$table <- renderTable({
       WDI(
-        country = ChooseCountryListServer("1")(), 
+        country = ChooseCountryListServer("1")(),
         indicator = ChooseIndicatorListServer("2")(),
         start = ChooseDateServer("3")()[1],
         end = ChooseDateServer("3")()[2]
-        )
-      })
+      )
+    })
   }
 )
 ```
