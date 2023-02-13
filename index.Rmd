@@ -14,6 +14,7 @@ library(leaflet)
 library(WDI)
 library(bslib)
 library(plotly)
+library(data.table)
 
 ```
 
@@ -47,9 +48,9 @@ shinyApp(
       ),
       mainPanel(tabsetPanel(
         type = "tabs",
-        tabPanel("Custom",
-                 withSpinner(tableOutput("table"), color = "#80c4ac")),
-        tabPanel("Overview"),
+        tabPanel("Custom"),
+                 #withSpinner(tableOutput("table"), color = "#80c4ac")),
+        tabPanel("Overview", plotOutput("plot")),
         tabPanel("XvsY")
       )),
     )
@@ -58,7 +59,7 @@ shinyApp(
   #SERVER#
   ########
   server = function(input, output) {
-    output$table <- renderTable({
+    selectData <- reactive({
       WDI(
         country = ChooseCountryListServer("1")(),
         indicator = ChooseIndicatorListServer("2")(),
@@ -66,6 +67,12 @@ shinyApp(
         end = ChooseDateServer("3")()[2]
       )
     })
+    
+    output$plot <- renderPlot({
+      plotdata<-melt(setDT(selectData()), id.vars = c("country","iso2c","iso3c","year"), variable.name = "indicator")
+      plot<-plot(plotdata$year,plotdata$value)
+      return(plot)
+      })
   }
 )
 ```
