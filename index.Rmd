@@ -21,6 +21,7 @@ library(plotly)
 source("apps/data/get-data.r")
 source("apps/choose-country-list/choose-country-list.R")
 source("apps/choose-indicator/choose-indicator.R")
+source("apps/choose-date/choose-date.R")
 ```
 
 Indicators Overview 
@@ -36,7 +37,8 @@ shinyApp(
   sidebarLayout(
     sidebarPanel(
       ChooseCountryListUI("1"),
-      ChooseIndicatorListUI("2")),
+      ChooseIndicatorListUI("2"),
+      ChooseDateUI("3")),
     mainPanel(
       tabsetPanel(type = "tabs",
                   tabPanel("Custom",withSpinner(tableOutput("table"), color = "#80c4ac")),
@@ -48,7 +50,14 @@ shinyApp(
   
 ##########################################################################
   server = function(input, output) {
-    output$table <- renderTable({WDI(country = ChooseCountryListServer("1")(), indicator = ChooseIndicatorListServer("2")())})
+    output$table <- renderTable({
+      na.omit(WDI(
+        country = ChooseCountryListServer("1")(), 
+        indicator = ChooseIndicatorListServer("2")(),
+        start = ChooseDateServer("3")()[1],
+        end = ChooseDateServer("3")()[2]
+        ))
+      })
   }
 )
 ```
