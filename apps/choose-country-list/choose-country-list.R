@@ -5,9 +5,9 @@ ChooseCountryListUI <- function(id) {
     fluidRow(
       selectizeInput(
         inputId = ns('searchCountry'),
-        label = 'Select Country',
+        label = strong('Select Country'),
         choices = WDI_Countries$Country.Name,
-        selected = "Ukraine",
+        selected = c("Ukraine","United States"),
         multiple = TRUE,
         # allow for multiple inputs
         options = list(create = FALSE) # if TRUE, allows newly created inputs

@@ -5,7 +5,7 @@ ChooseDateUI <- function(id) {
     fluidRow(
       sliderInput(
         ns("daterange"),
-        "Select date range:",
+        label = strong("Select date range"),
         min = 1960,
         max  = 2023,
         value = c(2007, 2023),

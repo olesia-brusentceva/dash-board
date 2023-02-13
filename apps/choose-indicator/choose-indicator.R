@@ -5,7 +5,7 @@ ChooseIndicatorListUI <- function(id) {
     fluidRow(
       selectizeInput(
         inputId = ns('searchIndicator'),
-        label = 'Select Indicator',
+        label = strong('Select Indicator'),
         choices = WDI_Indicators$Indicator.Name,
         selected = "GDP per capita (constant 2015 US$)",
         multiple = TRUE,
