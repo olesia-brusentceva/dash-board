@@ -11,7 +11,7 @@ ChooseIndicatorListUI <- function(id) {
       options = list(create = FALSE) # if TRUE, allows newly created inputs
     )),
     fluidRow(
-      helpText("Start typing Indicator name or select it out of the list. You can select up to 6 indicators to be displayed ")
+      helpText("Start typing Indicator name or select it out of the list. You can select up to 6 indicators to be displayed. If you select an indicator not applicable for chosen country or date range it will not be displayed. ")
     ),
     hr()
   )

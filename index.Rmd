@@ -51,12 +51,12 @@ shinyApp(
 ##########################################################################
   server = function(input, output) {
     output$table <- renderTable({
-      na.omit(WDI(
+      WDI(
         country = ChooseCountryListServer("1")(), 
         indicator = ChooseIndicatorListServer("2")(),
         start = ChooseDateServer("3")()[1],
         end = ChooseDateServer("3")()[2]
-        ))
+        )
       })
   }
 )

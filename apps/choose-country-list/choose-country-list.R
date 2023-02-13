@@ -4,14 +4,14 @@ ChooseCountryListUI <- function(id) {
   fluidRow(
     selectizeInput(
       inputId = ns('searchCountry'),
-      label = 'Search Country',
+      label = 'Select Country',
       choices = WDI_Countries$Country.Name,
       selected = "Ukraine",
       multiple = TRUE, # allow for multiple inputs
       options = list(create = FALSE) # if TRUE, allows newly created inputs
     )),
   fluidRow(
-    helpText("Start typing country or region name or select it on the map")
+    helpText("Start typing country or region name or select it on the map. You can select any number of countries or WB defined zones. ")
   ),
   hr()
   )

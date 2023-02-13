@@ -9,7 +9,7 @@ ChooseDateUI <- function(id) {
                      sep="")
       ),
     fluidRow(
-      helpText("Select date range to be displayed")
+      helpText("Select date range to be displayed. If date range contains non-existent values (NAs), f.e. Ukraine pre 1991, those would be ommited")
     ),
     hr()
   )
