@@ -1,6 +1,7 @@
 ChooseDateUI <- function(id) {
   ns <- NS(id)
   fluidPage(
+    theme = bs_theme(version = 4, bootswatch = "minty"),
     fluidRow(
       sliderInput(ns("daterange"), "Select date range:",
                      min = 1960,

@@ -1,6 +1,7 @@
 ChooseCountryListUI <- function(id) {
   ns <- NS(id)
   fluidPage(
+    theme = bs_theme(version = 4, bootswatch = "minty"),
   fluidRow(
     selectizeInput(
       inputId = ns('searchCountry'),
