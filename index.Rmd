@@ -24,6 +24,7 @@ library(geojsonio)
 
 source("apps/data/get-data.r")
 source("apps/choose-country-list/choose-country-list.R")
+source("apps/choose-country-map/choose-country-map.R")
 source("apps/choose-indicator/choose-indicator.R")
 source("apps/choose-date/choose-date.R")
 
@@ -44,7 +45,7 @@ shinyApp(
     theme = bs_theme(version = 4, bootswatch = "minty"),
     sidebarLayout(
       sidebarPanel(
-        ChooseCountryListUI("1"),
+        ChooseCountryMapUI("1"),
         ChooseIndicatorListUI("2"),
         ChooseDateUI("3")
         
@@ -69,12 +70,16 @@ shinyApp(
   ########
   server = function(input, output) {
     
+    country.list <- ChooseCountryMapServer("1")
+    indicator.list <- ChooseIndicatorListServer("2")
+    date.list <- ChooseDateServer("3")
+    
     selectData <- reactive({
       WDI(
-        country = ChooseCountryListServer("1")(),
-        indicator = ChooseIndicatorListServer("2")(),
-        start = ChooseDateServer("3")()[1],
-        end = ChooseDateServer("3")()[2]
+        country = country.list(),
+        indicator = indicator.list(),
+        start = date.list()[1],
+        end = date.list()[2]
       )
     })
     
