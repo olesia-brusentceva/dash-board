@@ -20,12 +20,12 @@ ui <- dashboardPage(
   dashboardBody(
     fluidRow(
       box(plotOutput("plot1", height = 250)),
-      box(radioGroupButtons(
+      div(radioGroupButtons(
         inputId = "change_plot",
         label = "Visualize:",
         choices = c(
-          `<i class='fa fa-bar-chart'></i>` = "line",
-          `<i class='fa fa-pie-chart'></i>` = "point"
+          `<i class='fa fa-line-chart'></i>` = "line",
+          `<i class='fa fa-point-chart'></i>` = "point"
         ),
         justified = TRUE,
         selected = "line"
@@ -50,8 +50,9 @@ server <- function(input, output) {
                    id.vars = c("country","iso2c","iso3c","year"),
                    variable.name = "indicator")
     splotdata <- plotdata[dim(plotdata)[1]:1,]
+    
     if (input$change_plot %in% "line") {
-      ggplot()+
+      plot<-ggplot()+
         geom_line(splotdata, mapping = aes(year, value, colour = country)) +
         ylab("value") +
         theme_classic() +
@@ -59,7 +60,7 @@ server <- function(input, output) {
       return(plot)
       
     } else {
-      ggplot()+
+      plot<-ggplot()+
         geom_point(splotdata, mapping = aes(year, value, colour = country)) +
         ylab("value") +
         theme_classic() +
