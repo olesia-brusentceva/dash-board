@@ -86,7 +86,7 @@ shinyApp(
       splotdata <- plotdata[dim(plotdata)[1]:1,]
       
       plot <- ggplot()+
-        geom_point(plotdata, mapping = aes(year, value, colour = country)) +
+        geom_point(splotdata, mapping = aes(year, value, colour = country)) +
         ylab("value") +
         theme_classic() +
         scale_color_grey()
