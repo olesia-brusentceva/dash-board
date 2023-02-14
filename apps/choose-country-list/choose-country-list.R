@@ -15,7 +15,7 @@ ChooseCountryListUI <- function(id) {
     ),
     fluidRow(
       helpText(
-        "Start typing country or region name or select it on the map. You can select any number of countries or WB defined zones. "
+        "Start typing country or region name or select it on the map. You can select any number of countries. To clear your selection use Backspace to delete the last selected country, chose the country from the list and delete it, or clear all selection "
       )
     ),
     hr()
