@@ -16,11 +16,6 @@ library(bslib)
 library(plotly)
 library(ggplot2)
 library(data.table)
-
-
-```
-
-```{r}
 library(leaflet)
 library(geojsonio)
 ```
