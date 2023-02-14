@@ -8,7 +8,7 @@ ChooseDateUI <- function(id) {
         label = strong("Select date range"),
         min = 1960,
         max  = 2023,
-        value = c(2007, 2023),
+        value = c(1995, 2023),
         sep = ""
       )
     ),

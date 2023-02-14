@@ -14,7 +14,9 @@ library(leaflet)
 library(WDI)
 library(bslib)
 library(plotly)
+library(ggplot2)
 library(data.table)
+
 
 ```
 
@@ -43,22 +45,29 @@ shinyApp(
       sidebarPanel(
         ChooseCountryListUI("1"),
         ChooseIndicatorListUI("2"),
-        ChooseDateUI("3"),
-        submitButton("Update View", icon("refresh"))
+        ChooseDateUI("3")
+        
+        #,submitButton("Update View", icon("refresh"))
       ),
       mainPanel(tabsetPanel(
         type = "tabs",
         tabPanel("Custom"),
                  #withSpinner(tableOutput("table"), color = "#80c4ac")),
-        tabPanel("Overview", plotOutput("plot")),
+        tabPanel("Overview",
+                 withSpinner(
+                 plotOutput("plot", brush = "plot_brush"),
+                 color = "#80c4ac"
+                 ),
+                 tableOutput("data")),
         tabPanel("XvsY")
-      )),
+      )
     )
-  ),
+  )),
   ########
   #SERVER#
   ########
   server = function(input, output) {
+    
     selectData <- reactive({
       WDI(
         country = ChooseCountryListServer("1")(),
@@ -69,10 +78,29 @@ shinyApp(
     })
     
     output$plot <- renderPlot({
-      plotdata<-melt(setDT(selectData()), id.vars = c("country","iso2c","iso3c","year"), variable.name = "indicator")
-      plot<-plot(plotdata$year,plotdata$value)
+      
+      plotdata<-melt(setDT(selectData()),
+                     id.vars = c("country","iso2c","iso3c","year"),
+                     variable.name = "indicator")
+      splotdata <- plotdata[dim(plotdata)[1]:1,]
+      
+      plot <- ggplot()+
+        geom_point(plotdata, mapping = aes(year, value, colour = country)) +
+        ylab("value") +
+        theme_classic() +
+        scale_color_grey()
       return(plot)
+      }, res = 96)
+    #,color="#69b3a2"
+      output$data <- renderTable({
+        
+        plotdata<-melt(setDT(selectData()),
+                     id.vars = c("country","iso2c","iso3c","year"),
+                     variable.name = "indicator")
+        
+    brushedPoints(plotdata, input$plot_brush)
       })
+      
   }
 )
 ```
