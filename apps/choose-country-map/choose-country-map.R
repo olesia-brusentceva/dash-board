@@ -73,8 +73,7 @@ ChooseCountryMapServer <- function(id)
           ),
           label = as.character(WB_CountryPolygons$NAME_EN),
           labelOptions = labelOptions(noHide = FALSE)
-        ) %>%
-        setMaxBounds(-180, -90, 180, 90)
+        ) 
     })
     
     
