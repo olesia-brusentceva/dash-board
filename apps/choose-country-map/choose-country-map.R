@@ -7,7 +7,7 @@ ui <- fluidPage(
   )),
   theme = bs_theme(version = 4, bootswatch = "minty"),
   shinydashboard::box(
-    width = 12,
+    width = 16,
     column(
       width = 2,
       selectizeInput(
@@ -20,6 +20,20 @@ ui <- fluidPage(
         options = list(create = FALSE)
       )
     ),
+    
+    column(
+      width = 2,
+      actionButton(
+        inputId = "clearHighlight"
+        ,
+        icon = icon(name = "eraser")
+        ,
+        label = ""
+        
+      )
+    ),
+    column(width = 2,
+           verbatimTextOutput("text")),
     column(width = 10,
            leafletOutput(outputId = "myMap",
                          height = 850))
@@ -28,6 +42,10 @@ ui <- fluidPage(
 
 
 server <- function(input, output, session) {
+  
+  click.list <- reactiveValues(ids = vector())
+  groups <- reactiveValues(count = 0)
+  
   foundational.map <- reactive({
     leaflet() %>%
       addPolygons(
@@ -50,29 +68,19 @@ server <- function(input, output, session) {
       )
   })
   
-  output$myMap <- renderLeaflet({
-    foundational.map()
-    
-  })
   
-  click.list <- reactiveValues(ids = vector())
-  
-  # observe where the user clicks on the leaflet map
-  # during the Shiny app session
+  # observe where the user clicks on the leaflet map during the Shiny app session
   # Courtesy of two articles:
   # https://stackoverflow.com/questions/45953741/select-and-deselect-polylines-in-shiny-leaflet
   # https://rstudio.github.io/leaflet/shiny.html
-  
   observeEvent(input$myMap_shape_click, {
     # store the click(s) over time
-    click <- c(input$myMap_shape_click, input$searchCountry)
+    click <- input$myMap_shape_click
     
     # store the polygon ids which are being clicked
     click.list$ids <- c(click.list$ids, click$id)
     
-    # filter the spatial data frame
-    # by only including polygons
-    # which are stored in the click.list$ids object
+    # filter the spatial data frame by only including polygons which are stored in the click.list$ids object
     lines.of.interest <-
       WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% click.list$ids) ,]
     
@@ -80,47 +88,54 @@ server <- function(input, output, session) {
       req(click$id)
     }
     else if (!click$id %in% lines.of.interest@data$id) {
-      # call the leaflet proxy
-      leafletProxy(mapId = "myMap") %>%
-        addPolygons(
-          data = lines.of.interest,
-          layerId = lines.of.interest@data$id,
-          fill = TRUE,
-          fillColor = "#f8949c",
-          fillOpacity = 1,
-          weight = 4,
-          color = "#80c4ac"
-        )
+      # call the input proxy
       updateSelectizeInput(session,
                            "searchCountry",
-                           selected = c(input$searchCountry, click.list$ids))
+                           selected = c(input$searchCountry, click$id))
     }
   })
-  
-  observeEvent(input$searchCountry,
-               {
-                 lines.of.interest <-
-                   WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% input$searchCountry) ,]
-                 
-                 leafletProxy(mapId = "myMap") %>%
-                   addPolygons(
-                     data = lines.of.interest,
-                     layerId = lines.of.interest@data$id,
-                     fill = TRUE,
-                     fillColor = "#f8949c",
-                     fillOpacity = 1,
-                     weight = 4,
-                     color = "#80c4ac"
-                   )
-               })
-  
-  output$text = reactive({
-    WDI_Countries[WDI_Countries$Country.Name %in% input$searchCountry, 2]
+  observeEvent(input$searchCountry, {
+    groups$count = groups$count + 1
+    
+    lines <-
+      WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% input$searchCountry),]
+    
+    leafletProxy(mapId = "myMap") %>%
+      addPolygons(
+        data = lines,
+        layerId = lines@data$id,
+        group = as.character(groups$count),
+        fill = TRUE,
+        fillColor = "#f8949c",
+        fillOpacity = 1,
+        weight = 4,
+        color = "#80c4ac"
+      ) %>% clearGroup(as.character(groups$count - 1))
+  })
+  observeEvent(input$clearHighlight, {
+    updateSelectizeInput(session,
+                         "searchCountry",
+                         selected = "")
+    
+    output$myMap <- renderLeaflet({
+      click.list$ids <- NULL
+      foundational.map()
+      
+    })
   })
   
-}
+  output$text = reactive({
+    WDI_Countries[WDI_Countries$Country.Name %in% input$searchCountry,2]
+  })
+  output$myMap <- renderLeaflet({
+    foundational.map()
+    
+  })
+  
+} # end of server
+
+shiny::shinyApp(ui = ui, server = server)
+
 
 ## run shinyApp ##
 shiny::shinyApp(ui = ui, server = server)
-
-# end of script #
