@@ -18,12 +18,18 @@ library(data.table)
 
 ```
 
+```{r}
+library(leaflet)
+library(geojsonio)
+```
+
 ```{r import-data}
 
 source("apps/data/get-data.r")
 source("apps/choose-country-list/choose-country-list.R")
 source("apps/choose-indicator/choose-indicator.R")
 source("apps/choose-date/choose-date.R")
+
 ```
 
 Indicators Overview 
