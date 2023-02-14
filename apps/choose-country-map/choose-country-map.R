@@ -32,7 +32,7 @@ ChooseCountryMapUI <- function(id)
     ),
     fluidRow(column(
       width = 12,
-      leafletOutput(outputId = ns("myMap"), width = "100%")
+      withSpinner(leafletOutput(outputId = ns("myMap"), width = "100%"), color = "#80c4ac"))
     )),
     fluidRow(column(
       width = 12,
@@ -73,7 +73,8 @@ ChooseCountryMapServer <- function(id)
           ),
           label = as.character(WB_CountryPolygons$NAME_EN),
           labelOptions = labelOptions(noHide = FALSE)
-        ) 
+        ) %>% setView(lng=0,lat=20,zoom = 1)
+        
     })
     
     
