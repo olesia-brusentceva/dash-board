@@ -45,6 +45,8 @@ shinyApp(
     theme = bs_theme(version = 4, bootswatch = "minty"),
     sidebarLayout(
       sidebarPanel(
+        actionButton("update","Update View", icon("refresh"), width = "100%"),
+        hr(),
         ChooseCountryMapUI("1"),
         ChooseIndicatorListUI("2"),
         ChooseDateUI("3")
@@ -74,14 +76,14 @@ shinyApp(
     indicator.list <- ChooseIndicatorListServer("2")
     date.list <- ChooseDateServer("3")
     
-    selectData <- reactive({
+    selectData <- eventReactive(input$update,{
       WDI(
         country = country.list(),
         indicator = indicator.list(),
         start = date.list()[1],
         end = date.list()[2]
       )
-    })
+    },ignoreNULL = FALSE)
     
     output$plot <- renderPlot({
       

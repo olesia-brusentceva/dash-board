@@ -32,7 +32,7 @@ ChooseCountryMapUI <- function(id)
     ),
     fluidRow(column(
       width = 12,
-      withSpinner(leafletOutput(outputId = ns("myMap"), width = "100%"), color = "#80c4ac"))
+      withSpinner(leafletOutput(outputId = ns("myMap"), width = "100%"), color = "#80c4ac")
     )),
     fluidRow(column(
       width = 12,
