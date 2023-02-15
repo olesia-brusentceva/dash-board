@@ -119,7 +119,7 @@ shinyApp(
           geom_area(splotdata, mapping = aes(year, value, fill = country)) +
           ylab("value") +
           theme_classic() +
-          scale_fill_brewer(palette = "RdPu")
+          scale_fill_brewer(palette = "YIGn")
         return(plot)
       }
       
