@@ -10,6 +10,7 @@ library(htmltools)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
+library(shinyWidgets)
 library(leaflet)
 library(WDI)
 library(bslib)
@@ -55,13 +56,26 @@ shinyApp(
         type = "tabs",
         tabPanel("Custom"),
                  #withSpinner(tableOutput("table"), color = "#80c4ac")),
-        tabPanel("Overview",
-                 withSpinner(
-                 plotOutput("plot", brush = "plot_brush"),
-                 color = "#80c4ac"
-                 ),
-                 tableOutput("data")),
-        tabPanel("XvsY")
+        tabPanel(
+          "Overview",
+          div(
+            helpText(
+        "Select,what type of plot would you like to see. You can also find some data if you select area out of the plot in 'rectangle'"), hr(),
+            radioGroupButtons(
+              inputId = "change_plot",
+              choices = c(
+                `<i class='fa fa-line-chart'></i>` = "line",
+                `<i class='fa fa-area-chart''></i>` = "area"
+              ),
+              justified = TRUE,
+              selected = "line"
+            )
+          ),
+                    withSpinner(plotOutput("plot", brush = "plot_brush"),
+                      color = "#80c4ac"),
+          tableOutput("data")
+        ), 
+        tabPanel("XvsY", div())
       )
     )
   )),
@@ -90,14 +104,24 @@ shinyApp(
                      variable.name = "indicator")
       splotdata <- plotdata[dim(plotdata)[1]:1,]
       
-      plot <- ggplot()+
-        geom_point(splotdata, mapping = aes(year, value, colour = country)) +
-        ylab("value") +
-        theme_classic() +
-        scale_color_grey()
-      return(plot)
-      }, res = 96)
-    #,color="#69b3a2"
+      if (input$change_plot %in% "line") {
+        plot <- ggplot() +
+          geom_line(splotdata, mapping = aes(year, value, colour = country)) +
+          ylab("value") +
+          theme_classic() +
+          scale_fill_brewer(palette = "RdPu")
+        return(plot)
+        
+      } else {
+        plot <- ggplot() +
+          geom_area(splotdata, mapping = aes(year, value, fill = country)) +
+          ylab("value") +
+          theme_classic() +
+          scale_fill_brewer(palette = "RdPu")
+        return(plot)
+      }
+      
+    }, res = 96)
       output$data <- renderTable({
         
         plotdata<-melt(setDT(selectData()),
