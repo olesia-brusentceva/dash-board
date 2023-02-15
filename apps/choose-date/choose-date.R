@@ -9,7 +9,8 @@ ChooseDateUI <- function(id) {
         min = 1960,
         max  = 2023,
         value = c(1995, 2023),
-        sep = ""
+        sep = "",
+        width = "100%"
       )
     ),
     fluidRow(
