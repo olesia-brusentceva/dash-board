@@ -10,7 +10,7 @@ ChooseIndicatorListUI <- function(id) {
         selected = "GDP per capita (constant 2015 US$)",
         multiple = TRUE,
         # allow for multiple inputs
-        options = list(create = FALSE) # if TRUE, allows newly created inputs
+        options = list(create = FALSE, maxItems = 6) # if TRUE, allows newly created inputs
       )
     ),
     fluidRow(

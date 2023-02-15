@@ -109,7 +109,10 @@ ChooseCountryMapServer <- function(id)
     
     observeEvent(input$searchCountry,
                  {
+                   
                    groups$count = groups$count + 1
+                   
+                   if(is.null(input$searchCountry)) {leafletProxy(mapId = "myMap") %>% clearGroup(as.character(groups$count))}
                    
                    lines <-
                      WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% input$searchCountry),]
@@ -132,12 +135,7 @@ ChooseCountryMapServer <- function(id)
                    updateSelectizeInput(session,
                                         "searchCountry",
                                         selected = "")
-                   
-                   output$myMap <- renderLeaflet
-                   ({
-                     click.list$ids <- NULL
-                     foundational.map()
-                   })
+                   leafletProxy(mapId = "myMap") %>% clearGroup(as.character(groups$count))
                  })
     
     countries <- reactive({
