@@ -145,7 +145,7 @@ ChooseCountryMapServer <- function(id)
     output$myMap <- renderLeaflet({
       foundational.map()
     })
-    #return(countries)
+    return(countries)
   })
 }
 
