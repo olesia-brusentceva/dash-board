@@ -126,7 +126,9 @@ shinyApp(
       
     
     selectData <- eventReactive(input$update,{
-   
+      
+      req(country.list(),indicator.list(),date.list(),cancelOutput = TRUE)
+        
       data = melt(setDT(WDI(
         country = country.list(),
         indicator = indicator.list(),
