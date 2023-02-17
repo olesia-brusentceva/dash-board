@@ -35,48 +35,50 @@ ui <- dashboardPage(
   )
 )
 
-server <- function(input, output) {
+server = function(input, output) {
   
-  selectData <- reactive({
-    WDI(
-      country = ChooseCountryListServer("1")(),
-      indicator = ChooseIndicatorListServer("2")(),
-      start = ChooseDateServer("3")()[1],
-      end = ChooseDateServer("3")()[2]
-    )
-  })
-
-  output$plot1 <- renderPlot({
-    plotdata<-melt(setDT(selectData()),
-                   id.vars = c("country","iso2c","iso3c","year"),
-                   variable.name = "indicator")
+  country.list <- ChooseCountryMapServer("1")
+  indicator.list <- ChooseIndicatorListServer("2")
+  date.list <- ChooseDateServer("3")
+  
+  selectData <- eventReactive(input$update,{
+    melt(setDT(WDI(
+      country = country.list(),
+      indicator = indicator.list(),
+      start = date.list()[1],
+      end = date.list()[2]
+    )),id.vars = c("country","iso2c","iso3c","year"),
+    variable.name = "indicator")
+  },ignoreNULL = FALSE)
+  
+  output$plot <- renderPlot({
+    
+    plotdata<-selectData()
     splotdata <- plotdata[dim(plotdata)[1]:1,]
     
     if (input$change_plot %in% "line") {
-      plot<-ggplot()+
+      plot <- ggplot() +
         geom_line(splotdata, mapping = aes(year, value, colour = country)) +
         ylab("value") +
         theme_classic() +
-        scale_colour_brewer(palette = "RdPu")
+        scale_fill_brewer(palette = "RdPu")
       return(plot)
-      
     } else {
-      plot<-ggplot()+
+      plot <- ggplot() +
         geom_area(splotdata, mapping = aes(year, value, fill = country)) +
         ylab("value") +
-        theme_classic()+
-        scale_fill_brewer(palette = "RdPu")
+        theme_classic() +
+        scale_fill_brewer(palette = "YIGn")
       return(plot)
     }
     
   }, res = 96)
   output$data <- renderTable({
     
-    plotdata<-melt(setDT(selectData()),
-                   id.vars = c("country","iso2c","iso3c","year"),
-                   variable.name = "indicator")
+    plotdata<-selectData()
     
     brushedPoints(plotdata, input$plot_brush)
   })
+  
 }
 shinyApp(ui, server)

@@ -31,13 +31,33 @@ source("apps/choose-date/choose-date.R")
 
 ```
 
+```{r ploting}
+  #function for linear plotting  
+    line_plot <- function(splotdata){
+        plot <- ggplot() +
+          geom_line(splotdata, mapping = aes(year, value, colour = country)) +
+          ylab("value") +
+          theme_classic() +
+          scale_fill_brewer(palette = "RdPu")
+        return(plot)}
+  #function for area plotting  
+    area_plot <- function(splotdata){
+        plot <- ggplot() +
+          geom_area(splotdata, mapping = aes(year, value, fill = country)) +
+          ylab("value") +
+          theme_classic() +
+          scale_fill_brewer(palette = "YIGn")
+        return(plot)}
+
+```
+
 Indicators Overview 
 ===================================== 
 
 Countries Overview 
 =====================================  
 
-```{r}
+```{r, warning=FALSE}
 shinyApp(
   ####
   #UI#
@@ -73,7 +93,11 @@ shinyApp(
               selected = "line"
             )
           ),
-                    withSpinner(plotOutput("plot", brush = "plot_brush"),
+                    withSpinner(plotOutput("plot",
+                                           width = "50%",
+                                           height = "200px",
+                                           brush = "plot_brush"),
+
                       color = "#80c4ac"),
           tableOutput("data")
         ), 
@@ -85,50 +109,42 @@ shinyApp(
   #SERVER#
   ########
   server = function(input, output) {
-    
+
+       
     country.list <- ChooseCountryMapServer("1")
     indicator.list <- ChooseIndicatorListServer("2")
     date.list <- ChooseDateServer("3")
+      
     
     selectData <- eventReactive(input$update,{
-      WDI(
+   
+      data = melt(setDT(WDI(
         country = country.list(),
         indicator = indicator.list(),
         start = date.list()[1],
         end = date.list()[2]
-      )
-    },ignoreNULL = FALSE)
+      )),id.vars = c("country","iso2c","iso3c","year"),
+                     variable.name = "indicator")
+      
+        return(data)
+      },ignoreNULL = FALSE)
     
     output$plot <- renderPlot({
-      
-      plotdata<-melt(setDT(selectData()),
-                     id.vars = c("country","iso2c","iso3c","year"),
-                     variable.name = "indicator")
+      n=1
+      plotdata<-selectData()
+      plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[n],]
       splotdata <- plotdata[dim(plotdata)[1]:1,]
       
       if (input$change_plot %in% "line") {
-        plot <- ggplot() +
-          geom_line(splotdata, mapping = aes(year, value, colour = country)) +
-          ylab("value") +
-          theme_classic() +
-          scale_fill_brewer(palette = "RdPu")
-        return(plot)
-        
+        line_plot(splotdata)
       } else {
-        plot <- ggplot() +
-          geom_area(splotdata, mapping = aes(year, value, fill = country)) +
-          ylab("value") +
-          theme_classic() +
-          scale_fill_brewer(palette = "YIGn")
-        return(plot)
+        area_plot(splotdata)
       }
       
     }, res = 96)
       output$data <- renderTable({
         
-        plotdata<-melt(setDT(selectData()),
-                     id.vars = c("country","iso2c","iso3c","year"),
-                     variable.name = "indicator")
+        plotdata<-selectData()
         
     brushedPoints(plotdata, input$plot_brush)
       })
