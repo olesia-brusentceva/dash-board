@@ -97,19 +97,22 @@ shinyApp(
 #            )
           ),
                     #withSpinner(
-                      plotOutput("plot",
-                                           width = "50%",
-                                           height = "200px"#,
+           fluidRow(
+             column(6, plotOutput(outputId = "plot", width ="300px", heigth="300px")),
+             column(6, plotOutput(outputId ="plot1", width = "300px", height="300px")),
+                      #plotOutput("plot",
+                                           #width = "50%",
+                                           #height = "200px"#,
                                            #brush = "plot_brush"
-                                           ),
-                                plotOutput("plot1",
-                                           width = "50%",
-                                           height = "200px"#,
+                                           #),
+                                #plotOutput("plot1",
+                                 #          width = "50%",
+                                  #         height = "200px"#,
                                            #brush = "plot_brush"
-                                           )
+                                   #        )
 #,color = "#80c4ac")
 #,          tableOutput("data")
-        ), 
+        )), 
         tabPanel("XvsY", div())
       )
     )
