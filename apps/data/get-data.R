@@ -5,14 +5,9 @@ WB_CountryPolygons <-
   geojson_read("https://github.com/olesia-brusentceva/dash-boardd/blob/main/apps/data/WB_countries_Admin0_lowres.geojson?raw=true",
                what = "sp")
 
-
-<<<<<<< HEAD
 WB_CountryPolygons<-WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% WDI_Countries$Country.iso3c,]
 WDI_Countries <- WDI_Countries[WDI_Countries$Country.iso3c %in% WB_CountryPolygons$ISO_A3_EH,]
 
 WB_CountryPolygons$NAME_EN<- as.character(lapply(WB_CountryPolygons$ISO_A3_EH,function(x){WDI_Countries[WDI_Countries$Country.iso3c == x,1]}))
-=======
-WB_CountryPolygons$NAME_EN<- as.character(lapply(WB_CountryPolygons$ISO_A3,function(x){WDI_Countries[WDI_Countries$Country.iso3c == x,1]}))
->>>>>>> cbeefb0001d6fb5b8adc1f7f8114c278ae4166aa
 
 
