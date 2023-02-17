@@ -9,7 +9,6 @@ WB_CountryPolygons <-
 WB_CountryPolygons<-WB_CountryPolygons[WB_CountryPolygons$ISO_A3 %in% WDI_Countries$Country.iso3c,]
 WDI_Countries <- WDI_Countries[WDI_Countries$Country.iso3c %in% WB_CountryPolygons$ISO_A3,]
 
-countryName<-function(x){WDI_Countries[WDI_Countries$Country.iso3c == x,1]}
-
 WB_CountryPolygons$NAME_EN<- as.character(lapply(WB_CountryPolygons$ISO_A3,function(x){WDI_Countries[WDI_Countries$Country.iso3c == x,1]}))
+
 

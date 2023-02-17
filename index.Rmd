@@ -79,50 +79,45 @@ shinyApp(
       ),
       mainPanel(tabsetPanel(
         type = "tabs",
-        tabPanel("Custom"),
-                 #withSpinner(tableOutput("table"), color = "#80c4ac")),
+        tabPanel("Custom",
+                 div(
+                   helpText(
+                     "Select,what type of plot would you like to see. You can also find some data if you select area out of the plot in 'rectangle'"),
+                   hr(),
+                   radioGroupButtons(
+                     inputId = "change_plot",
+                     choices = c(
+                       `<i class='fa fa-line-chart'></i>` = "line",
+                       `<i class='fa fa-area-chart''></i>` = "area"),
+                     justified = TRUE,
+                     selected = "line")),
+                 withSpinner(
+                 plotOutput("firstPlot",
+                            width = "50%",
+                            height = "200px",
+                            brush = "plot_brush"),
+                 color = "#80c4ac"),
+                 tableOutput("data")
+                 ),
+                
         tabPanel(
           "Overview",
-          div(
-            helpText(
-        "Select,what type of plot would you like to see. You can also find some data if you select area out of the plot in 'rectangle'"), hr(),
-#            radioGroupButtons(
-#              inputId = "change_plot",
-#              choices = c(
-#                `<i class='fa fa-line-chart'></i>` = "line",
-#                `<i class='fa fa-area-chart''></i>` = "area"
-#              ),
-#              justified = TRUE,
-#              selected = "line"
-#            )
+          fluidRow(
+             column(5, plotOutput(outputId = "plot", width = "500px", height = "200px", brush = "plot_brush")),
+             column(5, plotOutput(outputId ="plot1", width = "500px", height = "200px", brush = "plot_brush"))
           ),
-                    #withSpinner(
-           fluidRow(
-             column(6, plotOutput(outputId = "plot", width ="300px", heigth="300px")),
-             column(6, plotOutput(outputId ="plot1", width = "300px", height="300px")),
-                      #plotOutput("plot",
-                                           #width = "50%",
-                                           #height = "200px"#,
-                                           #brush = "plot_brush"
-                                           #),
-                                #plotOutput("plot1",
-                                 #          width = "50%",
-                                  #         height = "200px"#,
-                                           #brush = "plot_brush"
-                                   #        )
-#,color = "#80c4ac")
-#,          tableOutput("data")
-        )), 
-        tabPanel("XvsY", div())
+          tableOutput("data")
+        ), 
+        
+        tabPanel("XvsY", verbatimTextOutput("table"))
       )
+      
     )
   )),
   ########
   #SERVER#
   ########
   server = function(input, output) {
-
-       
     country.list <- ChooseCountryMapServer("1")
     indicator.list <- ChooseIndicatorListServer("2")
     date.list <- ChooseDateServer("3")
@@ -132,55 +127,53 @@ shinyApp(
       
       req(country.list(),indicator.list(),date.list(),cancelOutput = TRUE)
         
-      data = melt(setDT(WDI(
+      return(melt(setDT(WDI(
         country = country.list(),
         indicator = indicator.list(),
         start = date.list()[1],
         end = date.list()[2]
       )),id.vars = c("country","iso2c","iso3c","year"),
-                     variable.name = "indicator")
+                     variable.name = "indicator"))
       
-        return(data)
       },ignoreNULL = FALSE)
     
+###Page1###
+    output$firstPlot <- renderPlot({
+            plotdata<-selectData()
+            plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[1],]
+            splotdata <- plotdata[dim(plotdata)[1]:1,]
+            
+      if (input$change_plot %in% "line") {
+        line_plot(splotdata)
+        } else {
+          area_plot(splotdata)
+          }
+      })
+###SecondPage###
+    #1#
     output$plot <- renderPlot({
+      plotdata<-selectData()
+      plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[1],]
+      splotdata <- plotdata[dim(plotdata)[1]:1,]
+      line_plot(splotdata)}, res = 96)
+    #2# 
+     plot1 <- reactive({
 
       plotdata<-selectData()
       #identify the number of indicators
       n <- length(unique(plotdata$indicator))
       plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[n],]
       splotdata <- plotdata[dim(plotdata)[1]:1,]
+      if (n==2){line_plot(splotdata)}
+      else
+      {return(NULL)}
+     })
 
-      
-      #if (input$change_plot %in% "line") {
-        line_plot(splotdata)
-      #} else {
-       # area_plot(splotdata)
-      #}
-      
-    }, res = 96)
-    
-    output$plot1 <- renderPlot({
-
-      plotdata<-selectData()
-      #identify the number of indicators
-      n <- length(unique(plotdata$indicator))
-      plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[n],]
-      splotdata <- plotdata[dim(plotdata)[1]:1,]
-
-      
-      #if (input$change_plot %in% "line") {
-        line_plot(splotdata)
-      #} else {
-       # area_plot(splotdata)
-      #}
-      
-    }, res = 96)
+     output$plot1 = renderPlot({plot1()})
+     #3#
       output$data <- renderTable({
-        
         plotdata<-selectData()
-        
-    brushedPoints(plotdata, input$plot_brush)
+        brushedPoints(plotdata, input$plot_brush)
       })
       
   }
