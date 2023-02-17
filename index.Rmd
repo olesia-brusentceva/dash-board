@@ -20,6 +20,20 @@ library(data.table)
 library(leaflet)
 library(geojsonio)
 library(rstudioapi)
+library(maptools)
+library(rgdal)
+library(maps)
+library(jsonlite)
+library(RColorBrewer)
+library(ggmap)
+library(wbstats)
+library(DT)
+library(magrittr)
+library(rvest)
+library(readxl)
+library(tidyverse)
+library(dplyr)
+library(scales)
 ```
 
 ```{r import-data}
@@ -56,7 +70,62 @@ source("apps/choose-date/choose-date.R", chdir=T)
 
 Indicators Overview 
 ===================================== 
+```{r Education Indicators Overview}
 
+#education indicators
+education.indicators.list <- c("SE.TER.CUAT.BA.ZS","SE.SEC.CUAT.LO.ZS","SE.SEC.CUAT.PO.ZS","SE.PRM.CUAT.ZS","SE.TER.CUAT.ST.ZS","SE.SEC.CUAT.UP.ZS","SE.TER.CUAT.MS.ZS","SE.TER.CUAT.DO.ZS")
+
+#countries of interest 
+countries.of.interest <- c("DEU", "FRA", "ITA", "GBR", "ESP", "UKR", "POL", "ROU", "NLD", "GRC", "BEL", "CZE", "PRT", "SWE", "HUN", "AUT", "SRB", "SVK", "SVN", "CHE", "BGR", "DNK", "FIN", "NOR", "IRL", "HRV", "MDA", "BIH", "ALB", "LTU", "MKD", "LVA", "EST", "MNE", "LUX", "MLT", "ISL", "AND", "MCO", "LIE", "SMR")
+
+polygons.of.interest <- WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]
+#data to plot on the map
+map.data <- WDI(country = countries.of.interest, indicator = "SE.XPD.TOTL.GB.ZS", start = 2016, end = 2016)
+
+min.expenditure <- floor(min(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
+max.expenditure <- ceiling(max(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
+
+
+polygons.of.interest$EDUC <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "SE.XPD.TOTL.GB.ZS"]
+
+
+
+shinyApp(
+  ####
+  #UI#
+  ####
+  ui=fluidPage(theme = bs_theme(version = 4, bootswatch = "minty"),
+    sidebarLayout(
+      sidebarPanel(
+        fluidRow(
+          ChooseCountryListUI("Vova_Country")
+        ),
+        fluidRow(
+          sliderInput("rangevalues",
+  label = strong("Select Total Expenditure on Education (% of government spending):"),
+  min = min.expenditure, max = max.expenditure,
+  value = c(min.expenditure, max.expenditure), 
+  step = 0.1,
+  sep="",
+  width = "100%"
+  )
+  )
+      ),
+      mainPanel(
+        verbatimTextOutput("test")
+      )
+    )
+  ),
+  ########
+  #SERVER#
+  ########
+  server = function(input,output){
+    country.list <- ChooseCountryListServer("Vova_Country")
+    output$test <- renderText({country.list()})
+  }
+)
+
+```
 Countries Overview 
 =====================================  
 
