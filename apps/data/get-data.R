@@ -1,9 +1,9 @@
 
-load("~/dash-boardd/apps/data/WDI_Countries.Rda")
-load("~/dash-boardd/apps/data/WDI_Indicators.Rda")
+load(url("http://github.com/olesia-brusentceva/dash-boardd/blob/main/apps/data/WDI_Countries.Rda?raw=true"))
+load(url("https://github.com/olesia-brusentceva/dash-boardd/blob/main/apps/data/WDI_Indicators.Rda?raw=true"))
 
 WB_CountryPolygons <-
-  geojson_read("~/dash-boardd/apps/data/WB_countries_Admin0_lowres.geojson",
+  geojson_read("https://github.com/olesia-brusentceva/dash-boardd/blob/main/apps/data/WB_countries_Admin0_lowres.geojson?raw=true",
                what = "sp")
 
 WB_CountryPolygons<-WB_CountryPolygons[WB_CountryPolygons$ISO_A3 %in% WDI_Countries$Country.iso3c,]
