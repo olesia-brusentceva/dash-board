@@ -38,7 +38,7 @@ library(scales)
 
 ```{r import-data}
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 source("apps/data/get-data.r", chdir=T)
 source("apps/choose-country-list/choose-country-list.R", chdir=T)
@@ -144,7 +144,6 @@ shinyApp(
         ChooseIndicatorListUI("2"),
         ChooseDateUI("3")
         
-        #,submitButton("Update View", icon("refresh"))
       ),
       mainPanel(tabsetPanel(
         type = "tabs",
@@ -182,11 +181,13 @@ shinyApp(
       )
       
     )
-  )),
+  )
+  ),
   ########
   #SERVER#
   ########
   server = function(input, output) {
+    
     country.list <- ChooseCountryMapServer("1")
     indicator.list <- ChooseIndicatorListServer("2")
     date.list <- ChooseDateServer("3")
@@ -207,27 +208,31 @@ shinyApp(
       },ignoreNULL = FALSE)
     
 ###Page1###
-    output$firstPlot <- renderPlot({
-            plotdata<-selectData()
-            plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[1],]
-            splotdata <- plotdata[dim(plotdata)[1]:1,]
-            
+    
+    
+    reactive({
+      plotdata <- selectData()
+      plotdata <- plotdata[plotdata$indicator == unique(plotdata$indicator)[1], ]
+      splotdata <- plotdata[dim(plotdata)[1]:1, ]
+      
       if (input$change_plot %in% "line") {
-        line_plot(splotdata)
-        } else {
-          area_plot(splotdata)
-          }
-      })
+        output$firstPlot <- renderPlot({line_plot(splotdata)})
+      } else {
+        output$firstPlot <-renderPlot({area_plot(splotdata)})
+      }
+    })
+    
 ###SecondPage###
     #1#
+    
     output$plot <- renderPlot({
       plotdata<-selectData()
       plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[1],]
       splotdata <- plotdata[dim(plotdata)[1]:1,]
       line_plot(splotdata)}, res = 96)
+    
     #2# 
-     plot1 <- reactive({
-
+    plot1 <- reactive({
       plotdata<-selectData()
       #identify the number of indicators
       n <- length(unique(plotdata$indicator))
@@ -238,7 +243,7 @@ shinyApp(
       {return(NULL)}
      })
 
-     output$plot1 = renderPlot({plot1()})
+     output$plot1 = renderPlot({plot1()}) #!
      #3#
       output$data <- renderTable({
         plotdata<-selectData()
