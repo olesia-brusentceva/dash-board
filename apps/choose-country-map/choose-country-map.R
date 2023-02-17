@@ -24,7 +24,7 @@ ChooseCountryMapUI <- function(id)
         options = list(create = FALSE),
         width = "100%",
       )
-    ),),
+    ), ),
     fluidRow(
       helpText(
         "Start typing country or region name or select it on the map. You can select any number of countries. To clear your selection use Backspace to delete the last selected country, chose the country from the list and delete it, or clear all selection "
@@ -32,7 +32,9 @@ ChooseCountryMapUI <- function(id)
     ),
     fluidRow(column(
       width = 12,
-      withSpinner(leafletOutput(outputId = ns("myMap"), width = "100%"), color = "#80c4ac")
+      withSpinner(leafletOutput(
+        outputId = ns("myMap"), width = "100%"
+      ), color = "#80c4ac")
     )),
     fluidRow(column(
       width = 12,
@@ -73,8 +75,10 @@ ChooseCountryMapServer <- function(id)
           ),
           label = as.character(WB_CountryPolygons$NAME_EN),
           labelOptions = labelOptions(noHide = FALSE)
-        ) %>% setView(lng=0,lat=20,zoom = 1)
-        
+        ) %>% setView(lng = 0,
+                      lat = 20,
+                      zoom = 1)
+      
     })
     
     
@@ -92,7 +96,7 @@ ChooseCountryMapServer <- function(id)
                    
                    # filter the spatial data frame by only including polygons which are stored in the click.list$ids object
                    lines.of.interest <-
-                     WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% click.list$ids) ,]
+                     WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% click.list$ids) , ]
                    
                    if (is.null(click$id))
                    {
@@ -109,13 +113,10 @@ ChooseCountryMapServer <- function(id)
     
     observeEvent(input$searchCountry,
                  {
-                   
                    groups$count = groups$count + 1
                    
-                   if(is.null(input$searchCountry)) {leafletProxy(mapId = "myMap") %>% clearGroup(as.character(groups$count))}
-                   
                    lines <-
-                     WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% input$searchCountry),]
+                     WB_CountryPolygons[which(WB_CountryPolygons$NAME_EN %in% input$searchCountry), ]
                    
                    leafletProxy(mapId = "myMap") %>%
                      addPolygons(
@@ -128,7 +129,7 @@ ChooseCountryMapServer <- function(id)
                        weight = 4,
                        color = "#80c4ac"
                      ) %>% clearGroup(as.character(groups$count - 1))
-                 })
+                 }, ignoreNULL = FALSE)
     
     observeEvent(input$clearHighlight,
                  {
@@ -144,6 +145,15 @@ ChooseCountryMapServer <- function(id)
     output$myMap <- renderLeaflet({
       foundational.map()
     })
-    return(countries)
+    #return(countries)
   })
 }
+
+
+ui <- fluidPage(ChooseCountryMapUI("a"))
+
+server <- function(input, output, session) {
+  ChooseCountryMapServer("a")
+}
+
+shinyApp(ui, server)
