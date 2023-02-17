@@ -148,12 +148,3 @@ ChooseCountryMapServer <- function(id)
     return(countries)
   })
 }
-
-
-ui <- fluidPage(ChooseCountryMapUI("a"))
-
-server <- function(input, output, session) {
-  ChooseCountryMapServer("a")
-}
-
-shinyApp(ui, server)
