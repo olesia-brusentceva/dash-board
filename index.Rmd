@@ -86,23 +86,29 @@ shinyApp(
           div(
             helpText(
         "Select,what type of plot would you like to see. You can also find some data if you select area out of the plot in 'rectangle'"), hr(),
-            radioGroupButtons(
-              inputId = "change_plot",
-              choices = c(
-                `<i class='fa fa-line-chart'></i>` = "line",
-                `<i class='fa fa-area-chart''></i>` = "area"
-              ),
-              justified = TRUE,
-              selected = "line"
-            )
+#            radioGroupButtons(
+#              inputId = "change_plot",
+#              choices = c(
+#                `<i class='fa fa-line-chart'></i>` = "line",
+#                `<i class='fa fa-area-chart''></i>` = "area"
+#              ),
+#              justified = TRUE,
+#              selected = "line"
+#            )
           ),
-                    withSpinner(plotOutput("plot",
+                    #withSpinner(
+                      plotOutput("plot",
                                            width = "50%",
-                                           height = "200px",
-                                           brush = "plot_brush"),
-
-                      color = "#80c4ac"),
-          tableOutput("data")
+                                           height = "200px"#,
+                                           #brush = "plot_brush"
+                                           ),
+                                plotOutput("plot1",
+                                           width = "50%",
+                                           height = "200px"#,
+                                           #brush = "plot_brush"
+                                           )
+#,color = "#80c4ac")
+#,          tableOutput("data")
         ), 
         tabPanel("XvsY", div())
       )
@@ -141,11 +147,28 @@ shinyApp(
       splotdata <- plotdata[dim(plotdata)[1]:1,]
 
       
-      if (input$change_plot %in% "line") {
+      #if (input$change_plot %in% "line") {
         line_plot(splotdata)
-      } else {
-        area_plot(splotdata)
-      }
+      #} else {
+       # area_plot(splotdata)
+      #}
+      
+    }, res = 96)
+    
+    output$plot1 <- renderPlot({
+
+      plotdata<-selectData()
+      #identify the number of indicators
+      n <- length(unique(plotdata$indicator))
+      plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[n],]
+      splotdata <- plotdata[dim(plotdata)[1]:1,]
+
+      
+      #if (input$change_plot %in% "line") {
+        line_plot(splotdata)
+      #} else {
+       # area_plot(splotdata)
+      #}
       
     }, res = 96)
       output$data <- renderTable({
