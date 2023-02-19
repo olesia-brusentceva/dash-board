@@ -56,6 +56,166 @@ source("apps/choose-date/choose-date.R", chdir=T)
 
 Indicators Overview 
 ===================================== 
+```{r Education Indicators Overview }
+
+#education indicators
+education.indicators.list <- c("SE.TER.CUAT.BA.ZS","SE.SEC.CUAT.LO.ZS","SE.SEC.CUAT.PO.ZS","SE.PRM.CUAT.ZS","SE.TER.CUAT.ST.ZS","SE.SEC.CUAT.UP.ZS","SE.TER.CUAT.MS.ZS","SE.TER.CUAT.DO.ZS")
+
+#countries of interest 
+countries.of.interest <- c("DEU", "FRA", "ITA", "GBR", "ESP", "UKR", "POL", "ROU", "NLD", "GRC", "BEL", "CZE", "PRT", "SWE", "HUN", "AUT", "SRB", "SVK", "SVN", "CHE", "BGR", "DNK", "FIN", "NOR", "IRL", "HRV", "MDA", "BIH", "ALB", "LTU", "MKD", "LVA", "EST", "MNE", "LUX", "MLT", "ISL", "AND", "MCO", "LIE", "SMR")
+
+polygons.of.interest <- WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]
+#data to plot on the map
+map.data <- WDI(country = countries.of.interest, indicator = "SE.XPD.TOTL.GB.ZS", start = 2016, end = 2016)
+
+min.expenditure <- floor(min(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
+max.expenditure <- ceiling(max(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
+
+
+polygons.of.interest$EDUC <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "SE.XPD.TOTL.GB.ZS"]
+
+palette <- colorBin(palette = "Greens", domain = c(min.expenditure, max.expenditure), bins = seq(min.expenditure, max.expenditure, by = 0.1), na.color = "#f8f4f4")
+
+shinyApp(
+  ####
+  #UI#
+  ####
+  ui=fluidPage(theme = bs_theme(version = 4, bootswatch = "minty"),
+               tags$head(tags$style(
+      HTML(
+        "
+    .leaflet-container {
+    background-color:rgba(255,0,0,0.0);}
+    "
+        )
+    )),
+    sidebarLayout(
+      sidebarPanel(
+        fluidRow(
+          ChooseCountryListUI("Vova_Country")
+        ),
+        fluidRow(
+          sliderInput("rangevalues",
+  label = strong("Select Total Expenditure on Education (% of government spending):"),
+  min = min.expenditure, max = max.expenditure,
+  value = c(min.expenditure, max.expenditure/2), 
+  step = 0.1,
+  sep="",
+  width = "100%"
+  )
+  ),
+  hr(),
+    fluidRow(
+      helpText(
+        "Select expenditure range to display on the map"
+      )
+    )
+      ),
+      mainPanel(
+       fluidRow(column(
+      width = 12,
+      withSpinner(leafletOutput(
+        outputId = "myMap", width = "100%"
+      ), color = "#80c4ac")
+    )),
+    fluidRow(
+      verbatimTextOutput("test")
+    )
+      )
+    )
+  ),
+  ########
+  #SERVER#
+  ########
+  server = function(input, output) {
+    country.list <- ChooseCountryListServer("Vova_Country")
+    
+    foundational.map <- reactive({
+      leaflet() %>%
+        addPolygons(
+          data = polygons.of.interest,
+          layerId = polygons.of.interest$NAME_EN,
+          group = "base",
+          fill = TRUE,
+          fillColor = "#f8f4f4",
+          fillOpacity = 1,
+          weight = 1,
+          color = "#5a5a5a",
+          highlightOptions = highlightOptions(
+            weight = 4,
+            color = "#80c4ac",
+            bringToFront = F
+          ),
+          label = paste0(
+            "Country: ",
+            polygons.of.interest$NAME_EN,
+            "<br/> ",
+            "Total exp.(%): ",
+            round(polygons.of.interest$EDUC, 2),
+            "<br/> "
+          ) %>% lapply(htmltools::HTML),
+          labelOptions = labelOptions(noHide = FALSE)
+        ) %>% setView(lng = 16.1657
+                      ,
+                      lat = 50.4515
+                      ,
+                      zoom = 3) %>%
+        setMaxBounds(
+          lng1 = 16.1657
+          ,
+          lat1 = 50.4515
+          ,
+          lng2 = 16.1657
+          ,
+          lat2 = 50.4515
+        )
+    })
+    
+    groups <- reactiveValues(count = 0)
+    
+    observeEvent(input$rangevalues, {
+      groups$count = groups$count + 1
+      
+      lines.of.interest <-
+        polygons.of.interest[which(
+          !is.na(polygons.of.interest$EDUC) &
+            polygons.of.interest$EDUC >= input$rangevalues[1] &
+            polygons.of.interest$EDUC <= input$rangevalues[2]
+        ), ]
+      output$test <- renderText({
+        lines.of.interest$NAME_EN
+      })
+      
+      leafletProxy(mapId = "myMap") %>%
+        addPolygons(
+          data = lines.of.interest,
+          layerId = lines.of.interest@data$id,
+          group = as.character(groups$count),
+          fill = TRUE,
+          fillColor = palette(polygons.of.interest$EDUC),
+          fillOpacity = 1,
+          weight = 1,
+          color = "#80c4ac",
+          label = paste0(
+            "<strong>Country: </strong>",
+            lines.of.interest$NAME_EN,
+            "<br/> ",
+            "<strong>Total exp.(%): </strong>",
+            round(lines.of.interest$EDUC, 2),
+            "<br/> "
+          ) %>% lapply(htmltools::HTML),
+          labelOptions = labelOptions(noHide = FALSE)
+        ) %>% clearGroup(as.character(groups$count - 1))
+    }, ignoreNULL = FALSE)
+    
+    output$myMap <- renderLeaflet({
+      foundational.map()
+    })
+    
+  }
+)
+
+```
 
 Countries Overview 
 =====================================  

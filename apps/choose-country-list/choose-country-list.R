@@ -15,7 +15,7 @@ ChooseCountryListUI <- function(id) {
     ),
     fluidRow(
       helpText(
-        "Start typing country or region name. You may select <strong>only one</strong> country"
+        "Start typing country or region name. You may select only one country"
       )
     ),
     hr()
