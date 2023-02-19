@@ -259,8 +259,8 @@ shinyApp(
                      selected = "line")),
                  withSpinner(
                  plotOutput("firstPlot",
-                            width = "50%",
-                            height = "200px",
+                            width = "100%",
+                            height = "300px",
                             brush = "plot_brush"),
                  color = "#80c4ac"),
                  tableOutput("data")
@@ -268,9 +268,16 @@ shinyApp(
                 
         tabPanel(
           "Overview",
+          br(),
           fluidRow(
-             column(5, plotOutput(outputId = "plot", width = "500px", height = "200px", brush = "plot_brush")),
-             column(5, plotOutput(outputId ="plot1", width = "500px", height = "200px", brush = "plot_brush"))
+             column(6,
+                    withSpinner(
+                    plotOutput(outputId = "plot1", width = "500px", height = "200px", brush = "plot_brush"), color = "#80c4ac"),
+                    withSpinner(
+                    plotOutput(outputId = "plot2", width = "500px", height = "200px", brush = "plot_brush"), color = "#80c4ac")
+                    ),
+             column(6, plotOutput(outputId ="plot3", width = "500px", height = "200px", brush = "plot_brush")),
+             
           ),
           fluidRow(
             tableOutput("data2")
@@ -310,29 +317,29 @@ shinyApp(
 ###Page1###
     
     
-    reactive({
+    output$firstPlot <- renderPlot({
       plotdata <- selectData()
       plotdata <- plotdata[plotdata$indicator == unique(plotdata$indicator)[1], ]
       splotdata <- plotdata[dim(plotdata)[1]:1, ]
       
       if (input$change_plot %in% "line") {
-        output$firstPlot <- renderPlot({line_plot(splotdata)})
+        line_plot(splotdata)
       } else {
-        output$firstPlot <-renderPlot({area_plot(splotdata)})
+        area_plot(splotdata)
       }
     })
     
 ###SecondPage###
     #1#
     
-    output$plot <- renderPlot({
+    output$plot1 <- renderPlot({
       plotdata<-selectData()
       plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[1],]
       splotdata <- plotdata[dim(plotdata)[1]:1,]
       line_plot(splotdata)}, res = 96)
     
     #2# 
-    plot1 <- reactive({
+    plot2 <- reactive({
       plotdata<-selectData()
       #identify the number of indicators
       n <- length(unique(plotdata$indicator))
@@ -343,8 +350,21 @@ shinyApp(
       {return(NULL)}
      })
 
-     output$plot1 = renderPlot({plot1()}) #!
+     output$plot2 = renderPlot({plot2()}) #!
      #3#
+    plot3 <- reactive({
+      plotdata<-selectData()
+      #identify the number of indicators
+      n <- length(unique(plotdata$indicator))
+      plotdata<-plotdata[plotdata$indicator == unique(plotdata$indicator)[n],]
+      splotdata <- plotdata[dim(plotdata)[1]:1,]
+      if (n==3){line_plot(splotdata)}
+      else
+      {return(NULL)}
+     })
+
+     output$plot3 = renderPlot({plot3()}) #!     
+     #4#
       output$data <- renderTable({
         plotdata<-selectData()
         brushedPoints(plotdata, input$plot_brush)
