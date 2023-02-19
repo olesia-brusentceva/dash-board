@@ -73,6 +73,7 @@ max.expenditure <- ceiling(max(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
 
 
 polygons.of.interest$EDUC <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "SE.XPD.TOTL.GB.ZS"]
+polygons.of.interest <- polygons.of.interest[order(polygons.of.interest$EDUC, decreasing = TRUE),]
 
 palette <- colorBin(palette = "Greens", domain = c(min.expenditure, max.expenditure), bins = seq(min.expenditure, max.expenditure, by = 0.1), na.color = "#f8f4f4")
 
@@ -128,7 +129,9 @@ shinyApp(
   #SERVER#
   ########
   server = function(input, output) {
+    
     country.list <- ChooseCountryListServer("Vova_Country")
+    groups <- reactiveValues(count = 0)
     
     foundational.map <- reactive({
       leaflet() %>%
@@ -137,20 +140,15 @@ shinyApp(
           layerId = polygons.of.interest$NAME_EN,
           group = "base",
           fill = TRUE,
-          fillColor = "#f8f4f4",
+          fillColor = palette(polygons.of.interest$EDUC),
           fillOpacity = 1,
           weight = 1,
-          color = "#5a5a5a",
-          highlightOptions = highlightOptions(
-            weight = 4,
-            color = "#80c4ac",
-            bringToFront = F
-          ),
+          color = "#80c4ac",
           label = paste0(
-            "Country: ",
+            "<strong>Country: </strong>",
             polygons.of.interest$NAME_EN,
             "<br/> ",
-            "Total exp.(%): ",
+            "<strong>Total exp.(%): </strong>",
             round(polygons.of.interest$EDUC, 2),
             "<br/> "
           ) %>% lapply(htmltools::HTML),
@@ -168,10 +166,16 @@ shinyApp(
           lng2 = 16.1657
           ,
           lat2 = 50.4515
-        )
+        )%>%
+   addLegend(
+      colors= palette(polygons.of.interest$EDUC), labels = paste0(
+            polygons.of.interest$NAME_EN,
+            " - ",
+            round(polygons.of.interest$EDUC, 2), " %"
+          ),
+      opacity = 1, title = "Total exp.(%)"
+    )
     })
-    
-    groups <- reactiveValues(count = 0)
     
     observeEvent(input$rangevalues, {
       groups$count = groups$count + 1
@@ -179,12 +183,9 @@ shinyApp(
       lines.of.interest <-
         polygons.of.interest[which(
           !is.na(polygons.of.interest$EDUC) &
-            polygons.of.interest$EDUC >= input$rangevalues[1] &
-            polygons.of.interest$EDUC <= input$rangevalues[2]
+            polygons.of.interest$EDUC <= input$rangevalues[1] |
+            polygons.of.interest$EDUC >= input$rangevalues[2]
         ), ]
-      output$test <- renderText({
-        lines.of.interest$NAME_EN
-      })
       
       leafletProxy(mapId = "myMap") %>%
         addPolygons(
@@ -192,21 +193,27 @@ shinyApp(
           layerId = lines.of.interest@data$id,
           group = as.character(groups$count),
           fill = TRUE,
-          fillColor = palette(polygons.of.interest$EDUC),
+          fillColor = "#f8f4f4",
           fillOpacity = 1,
           weight = 1,
-          color = "#80c4ac",
+          color = "#5a5a5a",
+          highlightOptions = highlightOptions(
+            weight = 4,
+            color = "#80c4ac",
+            bringToFront = F
+          ),
           label = paste0(
-            "<strong>Country: </strong>",
+            "Country: ",
             lines.of.interest$NAME_EN,
             "<br/> ",
-            "<strong>Total exp.(%): </strong>",
+            "Total exp.(%): ",
             round(lines.of.interest$EDUC, 2),
             "<br/> "
           ) %>% lapply(htmltools::HTML),
           labelOptions = labelOptions(noHide = FALSE)
         ) %>% clearGroup(as.character(groups$count - 1))
     }, ignoreNULL = FALSE)
+    
     
     output$myMap <- renderLeaflet({
       foundational.map()
