@@ -60,23 +60,27 @@ Indicators Overview
 ```{r Education Indicators Overview }
 
 #education indicators
-education.indicators.list <- c("SE.TER.CUAT.BA.ZS","SE.SEC.CUAT.LO.ZS","SE.SEC.CUAT.PO.ZS","SE.PRM.CUAT.ZS","SE.TER.CUAT.ST.ZS","SE.SEC.CUAT.UP.ZS","SE.TER.CUAT.MS.ZS","SE.TER.CUAT.DO.ZS")
+education.indicators.list <- c("SE.TER.CUAT.DO.ZS","SE.TER.CUAT.MS.ZS","SE.TER.CUAT.BA.ZS","SE.TER.CUAT.ST.ZS","SE.SEC.CUAT.UP.ZS","SE.SEC.CUAT.LO.ZS","SE.SEC.CUAT.PO.ZS","SE.PRM.CUAT.ZS")
 
 #countries of interest 
 countries.of.interest <- c("DEU", "FRA", "ITA", "GBR", "ESP", "UKR", "POL", "ROU", "NLD", "GRC", "BEL", "CZE", "PRT", "SWE", "HUN", "AUT", "SRB", "SVK", "SVN", "CHE", "BGR", "DNK", "FIN", "NOR", "IRL", "HRV", "MDA", "BIH", "ALB", "LTU", "MKD", "LVA", "EST", "MNE", "LUX", "MLT", "ISL", "AND", "MCO", "LIE", "SMR")
 
 polygons.of.interest <- WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]
 #data to plot on the map
-map.data <- WDI(country = countries.of.interest, indicator = "SE.XPD.TOTL.GB.ZS", start = 2016, end = 2016)
+map.data <- WDI(country = countries.of.interest, indicator = "SE.XPD.TOTL.GB.ZS", latest = 1)
+
+country.data <- na.omit(melt(setDT(WDI(country = countries.of.interest, indicator = education.indicators.list, latest = 1)),id.vars = c("country","iso2c","iso3c","year"), variable.name = "indicator"))
+country.data$indicator<-sapply(country.data$indicator, function(x){WDIsearch(x,field="indicator")$name})
 
 min.expenditure <- floor(min(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
 max.expenditure <- ceiling(max(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
 
 
 polygons.of.interest$EDUC <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "SE.XPD.TOTL.GB.ZS"]
+polygons.of.interest$EDUC.YEAR <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "year"]
 polygons.of.interest <- polygons.of.interest[order(polygons.of.interest$EDUC, decreasing = TRUE),]
 
-palette <- colorBin(palette = "Greens", domain = c(min.expenditure, max.expenditure), bins = seq(min.expenditure, max.expenditure, by = 0.1), na.color = "#f8f4f4")
+palette <- colorBin(palette = "Greens", domain = c(min.expenditure, max.expenditure), bins = seq(min.expenditure, max.expenditure, by = 0.01), na.color = "#f8f4f4")
 
 shinyApp(
   ####
@@ -94,7 +98,7 @@ shinyApp(
     sidebarLayout(
       sidebarPanel(
         fluidRow(
-          ChooseCountryListUI("Vova_Country")
+          ChooseCountryListUI("Vova_Country",WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]$NAME_EN)
         ),
         fluidRow(
           sliderInput("rangevalues",
@@ -121,7 +125,7 @@ shinyApp(
       ), color = "#80c4ac")
     )),
     fluidRow(
-      verbatimTextOutput("test")
+      tableOutput("test")
     )
       )
     )
@@ -131,7 +135,7 @@ shinyApp(
   ########
   server = function(input, output) {
     
-    country.list <- ChooseCountryListServer("Vova_Country")
+    country <- ChooseCountryListServer("Vova_Country")
     groups <- reactiveValues(count = 0)
     
     foundational.map <- reactive({
@@ -141,7 +145,7 @@ shinyApp(
           layerId = polygons.of.interest$NAME_EN,
           group = "base",
           fill = TRUE,
-          fillColor = palette(polygons.of.interest$EDUC),
+          fillColor = palette(polygons.of.interest$EDUC), 
           fillOpacity = 1,
           weight = 1,
           color = "#80c4ac",
@@ -149,6 +153,9 @@ shinyApp(
             "<strong>Country: </strong>",
             polygons.of.interest$NAME_EN,
             "<br/> ",
+            "<strong>Year: </strong>",
+            polygons.of.interest$EDUC.YEAR,
+            "<br/>",
             "<strong>Total exp.(%): </strong>",
             round(polygons.of.interest$EDUC, 2),
             "<br/> "
@@ -207,6 +214,9 @@ shinyApp(
             "Country: ",
             lines.of.interest$NAME_EN,
             "<br/> ",
+            "Year: ",
+            lines.of.interest$EDUC.YEAR,
+            "<br/>",
             "Total exp.(%): ",
             round(lines.of.interest$EDUC, 2),
             "<br/> "
@@ -215,6 +225,12 @@ shinyApp(
         ) %>% clearGroup(as.character(groups$count - 1))
     }, ignoreNULL = FALSE)
     
+    observeEvent(country(),{
+      
+      plot.data <- country.data[country.data$iso3c == country(),]
+      output$test <- renderTable({plot.data})
+      
+    }, ignoreNULL = FALSE)
     
     output$myMap <- renderLeaflet({
       foundational.map()

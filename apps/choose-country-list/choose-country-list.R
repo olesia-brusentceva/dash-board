@@ -1,4 +1,4 @@
-ChooseCountryListUI <- function(id) {
+ChooseCountryListUI <- function(id, all.choices) {
   ns <- NS(id)
   fluidPage(
     theme = bs_theme(version = 4, bootswatch = "minty"),
@@ -6,7 +6,7 @@ ChooseCountryListUI <- function(id) {
       selectizeInput(
         inputId = ns('searchCountry'),
         label = strong('Select Country'),
-        choices = WDI_Countries$Country.Name,
+        choices = all.choices,
         selected = c("Ukraine","United States"),
         multiple = FALSE,
         options = list(create = FALSE),
