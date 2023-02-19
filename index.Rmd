@@ -20,20 +20,6 @@ library(data.table)
 library(leaflet)
 library(geojsonio)
 library(rstudioapi)
-library(maptools)
-library(rgdal)
-library(maps)
-library(jsonlite)
-library(RColorBrewer)
-library(ggmap)
-library(wbstats)
-library(DT)
-library(magrittr)
-library(rvest)
-library(readxl)
-library(tidyverse)
-library(dplyr)
-library(scales)
 ```
 
 ```{r import-data}
@@ -70,8 +56,8 @@ source("apps/choose-date/choose-date.R", chdir=T)
 
 Indicators Overview 
 ===================================== 
-```{r Education Indicators Overview}
 
+<<<<<<< HEAD
 #education indicators
 education.indicators.list <- c("SE.TER.CUAT.BA.ZS","SE.SEC.CUAT.LO.ZS","SE.SEC.CUAT.PO.ZS","SE.PRM.CUAT.ZS","SE.TER.CUAT.ST.ZS","SE.SEC.CUAT.UP.ZS","SE.TER.CUAT.MS.ZS","SE.TER.CUAT.DO.ZS")
 
@@ -230,6 +216,8 @@ shinyApp(
 )
 
 ```
+=======
+>>>>>>> 6a1960a947f47846d6dd7c21c8ffd0691221c3f9
 Countries Overview 
 =====================================  
 
@@ -278,7 +266,9 @@ shinyApp(
              column(5, plotOutput(outputId = "plot", width = "500px", height = "200px", brush = "plot_brush")),
              column(5, plotOutput(outputId ="plot1", width = "500px", height = "200px", brush = "plot_brush"))
           ),
-          tableOutput("data")
+          fluidRow(
+            tableOutput("data2")
+          )
         ), 
         
         tabPanel("XvsY", verbatimTextOutput("table"))
@@ -350,6 +340,11 @@ shinyApp(
      output$plot1 = renderPlot({plot1()}) #!
      #3#
       output$data <- renderTable({
+        plotdata<-selectData()
+        brushedPoints(plotdata, input$plot_brush)
+      })
+      
+      output$data2 <- renderTable({
         plotdata<-selectData()
         brushedPoints(plotdata, input$plot_brush)
       })
