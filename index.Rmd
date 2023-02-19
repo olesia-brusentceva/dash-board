@@ -293,7 +293,8 @@ shinyApp(
              column(6,
                     withSpinner(
                plotlyOutput(outputId ="plot6", width = "500px", height = "200px"),color = "#80c4ac"))
-             )
+             ),
+          fluidRow(textOutput(outputId ="text"))
           )
              
           )
@@ -397,6 +398,10 @@ shinyApp(
         plotdata<-selectData()
         brushedPoints(plotdata, input$plot_brush)
       })
+      test <- reactive({
+                   WDI_Indicators[WDI_Indicators$Indicator.Name %in% input$searchIndicator, 1]
+                 })
+      output$text <- renderText((test()))
   }
 )
 ```
