@@ -8,8 +8,7 @@ ChooseCountryMapUI <- function(id)
     .leaflet-container {
     background-color:rgba(255,0,0,0.0);}
     "
-      ),
-      tags$style(type = 'text/css', "#clearHighlight { margin-top: 25px;}")
+        )
     )),
     theme = bs_theme(version = 4, bootswatch = "minty"),
     fluidRow(column(
