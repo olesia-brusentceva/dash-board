@@ -24,7 +24,7 @@ library(rstudioapi)
 
 ```{r import-data}
 
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 source("apps/data/get-data.r", chdir=T)
 source("apps/choose-country-list/choose-country-list.R", chdir=T)
@@ -36,21 +36,47 @@ source("apps/choose-date/choose-date.R", chdir=T)
 
 ```{r ploting}
   #function for linear plotting  
-    line_plot <- function(selectData){
+    line_plot <- function(selectData, indicator){
         plot <- ggplot() +
-          geom_line(selectData, mapping = aes(year, value, colour = country)) +
+          geom_line(selectData, mapping = aes(year, value, colour = country), size=2) +
           ylab("value") +
-          theme_classic() +
           scale_fill_brewer(palette = "RdPu")+
-          scale_y_log10()
+          scale_y_log10()+
+          labs(
+            x = "Year",
+            y= indicator
+          )+
+        theme(
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        panel.grid = element_line(colour = "grey"),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(face = "bold", size = 15),
+        axis.title.y = element_text(face = "bold", size = 15),
+        axis.text.x = element_text(face = "bold", size = 15),
+        axis.text.y = element_text(face = "bold", size = 15)
+        )
         return(plot)}
   #function for area plotting  
-    area_plot <- function(selectData){
+    area_plot <- function(selectData, indicator){
         plot <- ggplot() +
           geom_area(selectData, mapping = aes(year, value, fill = country)) +
           ylab("value") +
-          theme_classic() +
-          scale_fill_brewer(palette = "YIGn")
+          scale_fill_brewer(palette = "YIGn")+
+          labs(
+            x = "Year",
+            y= indicator
+          )+
+        theme(
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        panel.grid = element_line(colour = "grey"),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(face = "bold", size = 15),
+        axis.title.y = element_text(face = "bold", size = 15),
+        axis.text.x = element_text(face = "bold", size = 15),
+        axis.text.y = element_text(face = "bold", size = 15)
+        )
         return(plot)}
 
 ```
@@ -58,29 +84,6 @@ source("apps/choose-date/choose-date.R", chdir=T)
 Indicators Overview 
 ===================================== 
 ```{r Education Indicators Overview }
-
-#education indicators
-education.indicators.list <- c("SE.TER.CUAT.DO.ZS","SE.TER.CUAT.MS.ZS","SE.TER.CUAT.BA.ZS","SE.TER.CUAT.ST.ZS","SE.SEC.CUAT.UP.ZS","SE.SEC.CUAT.LO.ZS","SE.SEC.CUAT.PO.ZS","SE.PRM.CUAT.ZS")
-
-#countries of interest 
-countries.of.interest <- c("DEU", "FRA", "ITA", "GBR", "ESP", "UKR", "POL", "ROU", "NLD", "GRC", "BEL", "CZE", "PRT", "SWE", "HUN", "AUT", "SRB", "SVK", "SVN", "CHE", "BGR", "DNK", "FIN", "NOR", "IRL", "HRV", "MDA", "BIH", "ALB", "LTU", "MKD", "LVA", "EST", "MNE", "LUX", "MLT", "ISL", "AND", "MCO", "LIE", "SMR")
-
-polygons.of.interest <- WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]
-#data to plot on the map
-map.data <- WDI(country = countries.of.interest, indicator = "SE.XPD.TOTL.GB.ZS", latest = 1)
-
-country.data <- na.omit(melt(setDT(WDI(country = countries.of.interest, indicator = education.indicators.list, latest = 1)),id.vars = c("country","iso2c","iso3c","year"), variable.name = "indicator"))
-country.data$indicator<-sapply(country.data$indicator, function(x){WDIsearch(x,field="indicator")$name})
-
-min.expenditure <- floor(min(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
-max.expenditure <- ceiling(max(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
-
-
-polygons.of.interest$EDUC <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "SE.XPD.TOTL.GB.ZS"]
-polygons.of.interest$EDUC.YEAR <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "year"]
-polygons.of.interest <- polygons.of.interest[order(polygons.of.interest$EDUC, decreasing = TRUE),]
-
-palette <- colorBin(palette = "Greens", domain = c(min.expenditure, max.expenditure), bins = seq(min.expenditure, max.expenditure, by = 0.01), na.color = "#f8f4f4")
 
 shinyApp(
   ####
@@ -92,17 +95,16 @@ shinyApp(
         "
     .leaflet-container {
     background-color:rgba(255,0,0,0.0);}
+    
+    #myMap {height: calc(100vh) !important;}
     "
         )
     )),
     sidebarLayout(
       sidebarPanel(
         fluidRow(
-          ChooseCountryListUI("Vova_Country",WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]$NAME_EN)
-        ),
-        fluidRow(
           sliderInput("rangevalues",
-  label = strong("Select Total Expenditure on Education (% of government spending):"),
+  label = strong("Select Total Expenditure on Education (% of government spending)"),
   min = min.expenditure, max = max.expenditure,
   value = c(min.expenditure, max.expenditure/2), 
   step = 0.1,
@@ -110,23 +112,33 @@ shinyApp(
   width = "100%"
   )
   ),
-  hr(),
     fluidRow(
       helpText(
         "Select expenditure range to display on the map"
-      )
-    )
+      )),  
+  hr(),
+  fluidRow(
+          ChooseCountryListUI("Vova_Country",WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]$NAME_EN)
+        ),
+  strong(textOutput("titlebar")),
+      fluidRow(
+        column(width = 12,
+         withSpinner( plotOutput("barplot"), color = "#80c4ac")
+        )
       ),
+  strong(textOutput("titlescatter")),
+  fluidRow(
+        column(width = 12,
+         withSpinner( plotOutput("scatterplot"), color = "#80c4ac")
+        )
+      )
+    ),
       mainPanel(
-       fluidRow(column(
-      width = 12,
+    fluidRow(column(width = 12,
       withSpinner(leafletOutput(
         outputId = "myMap", width = "100%"
       ), color = "#80c4ac")
-    )),
-    fluidRow(
-      tableOutput("test")
-    )
+    ))
       )
     )
   ),
@@ -165,7 +177,7 @@ shinyApp(
                       ,
                       lat = 50.4515
                       ,
-                      zoom = 3) %>%
+                      zoom = 4) %>%
         setMaxBounds(
           lng1 = 16.1657
           ,
@@ -175,11 +187,11 @@ shinyApp(
           ,
           lat2 = 50.4515
         )%>%
-   addLegend(
-      colors= palette(polygons.of.interest$EDUC), labels = paste0(
-            polygons.of.interest$NAME_EN,
+   addLegend(position = "bottomright",
+      colors= palette(unique(data.frame(NAME_EN=polygons.of.interest$NAME_EN, EDUC = polygons.of.interest$EDUC))$EDUC), labels = paste0(
+       unique(data.frame(NAME_EN=polygons.of.interest$NAME_EN, EDUC = polygons.of.interest$EDUC))$NAME_EN,
             " - ",
-            round(polygons.of.interest$EDUC, 2), " %"
+            round(unique(data.frame(NAME_EN=polygons.of.interest$NAME_EN, EDUC = polygons.of.interest$EDUC))$EDUC, 2), " %"
           ),
       opacity = 1, title = "Total exp.(%)"
     )
@@ -225,12 +237,58 @@ shinyApp(
         ) %>% clearGroup(as.character(groups$count - 1))
     }, ignoreNULL = FALSE)
     
-    observeEvent(country(),{
+    observeEvent(country,{
+    output$barplot <- renderPlot({
+      ggplot(country.data[country.data$iso3c == country(),])+
+        geom_bar(stat="identity", mapping = aes(x = indicator, y = value, fill=indicator))+
+        geom_label(mapping = aes(label = paste0(round(value,2)," %"), y =value, x = indicator), fill = "#f8949c")+
+        theme(
+        panel.grid.minor = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(face = "bold", size = 15),
+        legend.position = "none"
+        )+
+        labs(
+          x="",
+          y="",
+          title =""
+        )+
+      coord_flip()+
+        scale_fill_brewer(palette = "Greens")
       
-      plot.data <- country.data[country.data$iso3c == country(),]
-      output$test <- renderTable({plot.data})
-      
+    }, bg="transparent")
+    
+    output$scatterplot <- renderPlot({
+      ggplot(gdp.data[gdp.data$iso3c == country(),])+
+        geom_point(mapping = aes(x = SE.XPD.TOTL.GB.ZS, y = NY.GDP.MKTP.KD/(10^9)), color = "#f8949c", size = 4)+ 
+        geom_smooth(mapping = aes(x = SE.XPD.TOTL.GB.ZS, y = NY.GDP.MKTP.KD/(10^9)), method=lm , color= "#80c4ac", se=TRUE) +
+        theme(
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        panel.grid = element_line(colour = "grey"),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(face = "bold", size = 15),
+        axis.title.y = element_text(face = "bold", size = 15),
+        axis.text.x = element_text(face = "bold", size = 15),
+        axis.text.y = element_text(face = "bold", size = 15)
+        )+
+        labs(
+          x="Total Expenditure on Education (% of government spending)",
+          y="GDP (bln. const. USD 2015)",
+          title = 
+        )
+    }, bg="transparent")
+    
+    output$titlebar <- renderText({paste0("Educational Attainment in ",WDI_Countries[WDI_Countries$Country.iso3c == country(),1])})
+    output$titlescatter <- renderText({paste0("Education Expenditures vs. GDP in ", WDI_Countries[WDI_Countries$Country.iso3c == country(),1])})
+    
     }, ignoreNULL = FALSE)
+    
     
     output$myMap <- renderLeaflet({
       foundational.map()
@@ -264,9 +322,16 @@ shinyApp(
         type = "tabs",
         tabPanel("Custom",
                  div(
-                   helpText(
-                     "Select,what type of plot would you like to see. You can also find some data if you select area out of the plot in 'rectangle'"),
-                   hr(),
+                   br(),
+                   selectizeInput(
+                     inputId = 'selectIndicator',
+                     label = strong('Custom Plot Selector'),
+                     choices = c("GDP per capita (constant 2015 US$)"),
+                     selected = c("GDP per capita (constant 2015 US$)"),
+                     multiple = FALSE,
+                     options = list(create = FALSE),
+                     width = "100%",
+                   ),
                    radioGroupButtons(
                      inputId = "change_plot",
                      choices = c(
@@ -274,6 +339,9 @@ shinyApp(
                        `<i class='fa fa-area-chart''></i>` = "area"),
                      justified = TRUE,
                      selected = "line")),
+                   helpText(
+                     "Select indicator and type of plot would you like to construct. You can also find some data if you select an area on the plot in a 'rectangle'"),
+                   hr(),
                  withSpinner(
                  plotOutput("firstPlot",
                             width = "100%",
@@ -287,30 +355,38 @@ shinyApp(
           "Overview",
           br(),
           fluidRow(
-             column(6,
-                    withSpinner(
-                    plotlyOutput(outputId = "plot1", width = "500px", height = "200px"), color = "#80c4ac")),
-             column(6,
-                    withSpinner(
-               plotlyOutput(outputId ="plot2", width = "500px", height = "200px"),color = "#80c4ac"))
-             ),
+            column(width = 12,
+            withSpinner(plotlyOutput(outputId = "plot1", width = "100%"),color = "#80c4ac")
+            )
+          ),
           fluidRow(
-             column(6,
-                    withSpinner(
-                    plotlyOutput(outputId = "plot3", width = "500px", height = "200px"), color = "#80c4ac")),
-             column(6,
-                    withSpinner(
-               plotlyOutput(outputId ="plot4", width = "500px", height = "200px"),color = "#80c4ac"))
-             ),
+            column(width = 12,
+            withSpinner(plotlyOutput(outputId = "plot2", width = "100%"),color = "#80c4ac")
+            )
+          ),
           fluidRow(
-             column(6,
-                    withSpinner(
-                    plotlyOutput(outputId = "plot5", width = "500px", height = "200px"), color = "#80c4ac")),
-             column(6,
-                    withSpinner(
-               plotlyOutput(outputId ="plot6", width = "500px", height = "200px"),color = "#80c4ac"))
-             )
+            column(width = 12,
+            withSpinner(plotlyOutput(outputId = "plot3", width = "100%"),color = "#80c4ac")
+            )
+          ),
+          fluidRow(
+            column(width = 12,
+            withSpinner(plotlyOutput(outputId = "plot4", width = "100%"),color = "#80c4ac")
+            )
+          ),
+          fluidRow(
+            column(width = 12,
+            withSpinner(plotlyOutput(outputId = "plot5", width = "100%"),color = "#80c4ac")
+            )
+          ),
+          fluidRow(
+            column(width = 12,
+            withSpinner(plotlyOutput(outputId = "plot6", width = "100%"),color = "#80c4ac")
+            )
           )
+          )
+          
+        
              
           )
         )
@@ -325,7 +401,10 @@ shinyApp(
     country.list <- ChooseCountryMapServer("1")
     indicator.list <- ChooseIndicatorListServer("2")
     date.list <- ChooseDateServer("3")
-      
+    
+    observeEvent(input$update,{
+      updateSelectizeInput(session = getDefaultReactiveDomain(),'selectIndicator', choices = WDI_Indicators[WDI_Indicators$Indicator.Code %in% indicator.list(), 1]  )
+    },ignoreNULL = FALSE)
     
     selectData <- eventReactive(input$update,{
       
@@ -347,9 +426,9 @@ shinyApp(
     output$firstPlot <- renderPlot({
       
       if (input$change_plot %in% "line") {
-        line_plot(selectData())
+        line_plot(selectData()[selectData()$indicator == WDI_Indicators[WDI_Indicators$Indicator.Name == input$selectIndicator, 2],],input$selectIndicator)
       } else {
-        area_plot(selectData())
+        area_plot(selectData()[selectData()$indicator == WDI_Indicators[WDI_Indicators$Indicator.Name == input$selectIndicator, 2],],input$selectIndicator)
       }
     })
     
@@ -359,46 +438,83 @@ shinyApp(
     n <- reactive({length(unique(selectData()$indicator))})
     
     #2# 
-    plot1 <- reactive({
-      if (n()>=1){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[1],])}
+    plot1 <-eventReactive(input$update,{
+      if (n()>=1){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[1],],WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[1],1])+
+          theme(
+            axis.title.y = element_blank()
+          )+
+          labs(
+            title = WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[1],1]
+          )
+          }
       else
       {return(NULL)}
-     })
+     },ignoreNULL = FALSE)
     
     #2# 
-    plot2 <- reactive({
-      if (n()>=2){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[2],])}
+    plot2 <- eventReactive(input$update,{
+      if (n()>=2){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[2],],WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[2],1])+
+          theme(
+            axis.title.y = element_blank()
+          )+
+          labs(
+            title = WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[2],1]
+          )}
       else
       {return(NULL)}
-     })
+     },ignoreNULL = FALSE)
     
     #3# 
-    plot3 <- reactive({
-      if (n()>=3){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[3],])}
+    plot3 <- eventReactive(input$update,{
+      if (n()>=3){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[3],],WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[3],1])+
+          theme(
+            axis.title.y = element_blank()
+          )+
+          labs(
+            title = WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[3],1]
+          )}
       else
       {return(NULL)}
-     })
+     },ignoreNULL = FALSE)
     
     #4# 
-    plot4 <- reactive({
-      if (n()>=4){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[4],])}
+    plot4 <- eventReactive(input$update,{
+      if (n()>=4){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[4],],WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[4],1])+
+          theme(
+            axis.title.y = element_blank()
+          )+
+          labs(
+            title = WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[4],1]
+          )}
       else
       {return(NULL)}
-     })
+     },ignoreNULL = FALSE)
     
     #5# 
-    plot5 <- reactive({
-      if (n()>=5){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[5],])}
+    plot5 <- eventReactive(input$update,{
+      if (n()>=5){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[5],],WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[5],1])+
+          theme(
+            axis.title.y = element_blank()
+          )+
+          labs(
+            title = WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[5],1]
+          )}
       else
       {return(NULL)}
-     })
+     },ignoreNULL = FALSE)
     
     #6# 
-    plot6 <- reactive({
-      if (n()==6){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[6],])}
+    plot6 <- eventReactive(input$update,{
+      if (n()==6){line_plot(selectData()[selectData()$indicator == unique(selectData()$indicator)[6],],WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[6],1])+
+          theme(
+            axis.title.y = element_blank()
+          )+
+          labs(
+            title = WDI_Indicators[WDI_Indicators$Indicator.Code==indicator.list()[6],1]
+          )}
       else
       {return(NULL)}
-     })
+     },ignoreNULL = FALSE)
 
     output$plot1 = renderPlotly({plot1()}) 
     output$plot2 = renderPlotly({plot2()}) 
@@ -416,14 +532,3 @@ shinyApp(
   }
 )
 ```
-
-Architecture {data-navmenu="Making"}
-=====================================  
-
-
-Widgets {data-navmenu="Making"}
-=====================================  
-
-
-Team
-=====================================     
