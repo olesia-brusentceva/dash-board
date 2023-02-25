@@ -24,9 +24,9 @@ library(rstudioapi)
 
 ```{r import-data}
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-source("apps/data/get-data.r", chdir=T)
+source("apps/data/get-data.R", chdir=T)
 source("apps/choose-country-list/choose-country-list.R", chdir=T)
 source("apps/choose-country-map/choose-country-map.R", chdir=T)
 source("apps/choose-indicator/choose-indicator.R", chdir=T)
@@ -81,8 +81,8 @@ source("apps/choose-date/choose-date.R", chdir=T)
 
 ```
 
-Indicators Overview 
-===================================== 
+# Indicators Overview
+
 ```{r Education Indicators Overview }
 
 shinyApp(
@@ -299,8 +299,7 @@ shinyApp(
 
 ```
 
-Countries Overview 
-=====================================  
+# Countries Overview
 
 ```{r, warning=FALSE}
 shinyApp(
