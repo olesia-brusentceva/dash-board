@@ -85,28 +85,6 @@ Indicators Overview
 ===================================== 
 ```{r Education Indicators Overview }
 
-<<<<<<< HEAD
-=======
-#education indicators
-education.indicators.list <- c("SE.TER.CUAT.BA.ZS","SE.SEC.CUAT.LO.ZS","SE.SEC.CUAT.PO.ZS","SE.PRM.CUAT.ZS","SE.TER.CUAT.ST.ZS","SE.SEC.CUAT.UP.ZS","SE.TER.CUAT.MS.ZS","SE.TER.CUAT.DO.ZS")
-
-#countries of interest 
-countries.of.interest <- c("DEU", "FRA", "ITA", "GBR", "ESP", "UKR", "POL", "ROU", "NLD", "GRC", "BEL", "CZE", "PRT", "SWE", "HUN", "AUT", "SRB", "SVK", "SVN", "CHE", "BGR", "DNK", "FIN", "NOR", "IRL", "HRV", "MDA", "BIH", "ALB", "LTU", "MKD", "LVA", "EST", "MNE", "LUX", "MLT", "ISL", "AND", "MCO", "LIE", "SMR")
-
-polygons.of.interest <- WB_CountryPolygons[WB_CountryPolygons$ISO_A3_EH %in% countries.of.interest,]
-#data to plot on the map
-map.data <- WDI(country = countries.of.interest, indicator = "SE.XPD.TOTL.GB.ZS", start = 2016, end = 2016)
-
-min.expenditure <- floor(min(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
-max.expenditure <- ceiling(max(map.data$SE.XPD.TOTL.GB.ZS, na.rm = TRUE))
-
-
-polygons.of.interest$EDUC <- map.data[match(polygons.of.interest$ISO_A3_EH, map.data$iso3c), "SE.XPD.TOTL.GB.ZS"]
-polygons.of.interest <- polygons.of.interest[order(polygons.of.interest$EDUC, decreasing = TRUE),]
-
-palette <- colorBin(palette = "Greens", domain = c(min.expenditure, max.expenditure), bins = seq(min.expenditure, max.expenditure, by = 0.1), na.color = "#f8f4f4")
-
->>>>>>> 68d93cce6272991df32e0c50dcc4863902e14b42
 shinyApp(
   ####
   #UI#
@@ -125,12 +103,6 @@ shinyApp(
     sidebarLayout(
       sidebarPanel(
         fluidRow(
-<<<<<<< HEAD
-=======
-          ChooseCountryListUI("Vova_Country")
-        ),
-        fluidRow(
->>>>>>> 68d93cce6272991df32e0c50dcc4863902e14b42
           sliderInput("rangevalues",
   label = strong("Select Total Expenditure on Education (% of government spending)"),
   min = min.expenditure, max = max.expenditure,
@@ -166,14 +138,7 @@ shinyApp(
       withSpinner(leafletOutput(
         outputId = "myMap", width = "100%"
       ), color = "#80c4ac")
-<<<<<<< HEAD
     ))
-=======
-    )),
-    fluidRow(
-      verbatimTextOutput("test")
-    )
->>>>>>> 68d93cce6272991df32e0c50dcc4863902e14b42
       )
     )
   ),
@@ -182,7 +147,7 @@ shinyApp(
   ########
   server = function(input, output) {
     
-    country.list <- ChooseCountryListServer("Vova_Country")
+    country <- ChooseCountryListServer("Vova_Country")
     groups <- reactiveValues(count = 0)
     
     foundational.map <- reactive({
@@ -192,7 +157,7 @@ shinyApp(
           layerId = polygons.of.interest$NAME_EN,
           group = "base",
           fill = TRUE,
-          fillColor = palette(polygons.of.interest$EDUC),
+          fillColor = palette(polygons.of.interest$EDUC), 
           fillOpacity = 1,
           weight = 1,
           color = "#80c4ac",
@@ -200,6 +165,9 @@ shinyApp(
             "<strong>Country: </strong>",
             polygons.of.interest$NAME_EN,
             "<br/> ",
+            "<strong>Year: </strong>",
+            polygons.of.interest$EDUC.YEAR,
+            "<br/>",
             "<strong>Total exp.(%): </strong>",
             round(polygons.of.interest$EDUC, 2),
             "<br/> "
@@ -258,6 +226,9 @@ shinyApp(
             "Country: ",
             lines.of.interest$NAME_EN,
             "<br/> ",
+            "Year: ",
+            lines.of.interest$EDUC.YEAR,
+            "<br/>",
             "Total exp.(%): ",
             round(lines.of.interest$EDUC, 2),
             "<br/> "
@@ -266,7 +237,6 @@ shinyApp(
         ) %>% clearGroup(as.character(groups$count - 1))
     }, ignoreNULL = FALSE)
     
-<<<<<<< HEAD
     observeEvent(country,{
     output$barplot <- renderPlot({
       ggplot(country.data[country.data$iso3c == country(),])+
@@ -318,8 +288,6 @@ shinyApp(
     output$titlescatter <- renderText({paste0("Education Expenditures vs. GDP in ", WDI_Countries[WDI_Countries$Country.iso3c == country(),1])})
     
     }, ignoreNULL = FALSE)
-=======
->>>>>>> 68d93cce6272991df32e0c50dcc4863902e14b42
     
     
     output$myMap <- renderLeaflet({
@@ -397,7 +365,6 @@ shinyApp(
             )
           ),
           fluidRow(
-<<<<<<< HEAD
             column(width = 12,
             withSpinner(plotlyOutput(outputId = "plot3", width = "100%"),color = "#80c4ac")
             )
@@ -416,16 +383,6 @@ shinyApp(
             column(width = 12,
             withSpinner(plotlyOutput(outputId = "plot6", width = "100%"),color = "#80c4ac")
             )
-=======
-             column(6,
-                    withSpinner(
-                    plotlyOutput(outputId = "plot5", width = "500px", height = "200px"), color = "#80c4ac")),
-             column(6,
-                    withSpinner(
-               plotlyOutput(outputId ="plot6", width = "500px", height = "200px"),color = "#80c4ac"))
-             ),
-          fluidRow(textOutput(outputId ="text"))
->>>>>>> 68d93cce6272991df32e0c50dcc4863902e14b42
           )
           )
           
@@ -572,10 +529,6 @@ shinyApp(
         plotdata<-selectData()
         brushedPoints(plotdata, input$plot_brush)
       })
-      test <- reactive({
-                   WDI_Indicators[WDI_Indicators$Indicator.Name %in% input$searchIndicator, 1]
-                 })
-      output$text <- renderText((test()))
   }
 )
 ```
